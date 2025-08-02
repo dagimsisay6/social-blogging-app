@@ -1,9 +1,12 @@
 import React from "react";
 import { Routes, Route } from 'react-router-dom';
+
+// Import your page components
 import WelcomePage from "./pages/welcomePage";
 import SignUpPage from './pages/signupPage';
 import LoginPage from './pages/loginPage';
-import ResetPasswordPage from './pages/resetPasswordPage'; // Import the new component
+import ResetPasswordPage from './pages/resetPasswordPage';
+import ChatbotWidget from './components/ChatbotWidget'; // Import the ChatbotWidget component
 
 function App() {
   return (
@@ -18,10 +21,12 @@ function App() {
         {/* Login Page route */}
         <Route path="/login" element={<LoginPage />} />
 
-        {/* New route for Reset Password Page */}
+        {/* Route for Reset Password Page */}
         <Route path="/reset-password" element={<ResetPasswordPage />} />
       </Routes>
+      <ChatbotWidget /> {/* Render the chatbot widget here */}
     </div>
   );
 }
+
 export default App;
