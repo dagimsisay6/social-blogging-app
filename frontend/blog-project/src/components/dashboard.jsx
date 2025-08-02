@@ -1,50 +1,56 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 import { useAuth } from "../context/AuthContext";
-import { useNavigate } from "react-router-dom"; // Import useNavigate
-import { Plus } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
-  const { user, loading } = useAuth();
-  const navigate = useNavigate();
+  const { user, token, loading } = useAuth();
   const [posts, setPosts] = useState([]);
-  const [postsLoading, setPostsLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [loadingPosts, setLoadingPosts] = useState(true);
+  const navigate = useNavigate();
+
+  // Fetch the user's posts
+  const fetchUserPosts = async () => {
+    if (!token) return;
+    try {
+      const res = await axios.get("http://localhost:5001/api/posts/my-posts", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setPosts(res.data);
+    } catch (err) {
+      console.error("Error fetching user posts:", err);
+    } finally {
+      setLoadingPosts(false);
+    }
+  };
 
   useEffect(() => {
-    // Only fetch posts if a user is logged in and not currently loading
-    if (!loading && user && user.token) {
-      const fetchMyPosts = async () => {
-        setPostsLoading(true);
-        try {
-          const response = await fetch("http://localhost:5001/api/posts/my-posts", {
-            headers: {
-              'Authorization': `Bearer ${user.token}`,
-            },
-          });
+    fetchUserPosts();
+  }, [token]);
 
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-          }
+  // Handle like toggle
+  const handleLike = async (id, e) => {
+    e.stopPropagation(); // ⛔ Stop the card click
+    try {
+      const res = await axios.post(
+        `http://localhost:5001/api/posts/${id}/like`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
 
-          const data = await response.json();
-          setPosts(data);
-        } catch (err) {
-          console.error("Failed to fetch user's posts:", err);
-          setError("Failed to load your posts. Please try again later.");
-        } finally {
-          setPostsLoading(false);
-        }
-      };
+      const { likesCount } = res.data;
 
-      fetchMyPosts();
-    } else if (!loading && !user) {
-      // If no user is logged in, stop loading and clear posts
-      setPostsLoading(false);
-      setPosts([]);
+      setPosts((prev) =>
+        prev.map((p) =>
+          p._id === id ? { ...p, likes: new Array(likesCount).fill("x") } : p
+        )
+      );
+    } catch (err) {
+      console.error("Error liking post:", err);
     }
-  }, [user, loading]);
+  };
 
-  if (loading || postsLoading) {
+  if (loading) {
     return <div className="p-6 text-center">Loading your dashboard...</div>;
   }
 
@@ -74,16 +80,21 @@ const Dashboard = () => {
         </div>
       </header>
 
-      <main className="dashboard-content p-4">
+      <main className="dashboard-content p-4 max-w-7xl mx-auto">
+        {/* User Profile Section */}
         <section className="user-profile bg-white p-6 rounded-lg shadow-md mb-6 flex items-center">
           <img
-            src={user.profilePicture || "https://via.placeholder.com/100"}
+            src={
+              user.profilePicture
+                ? `${user.profilePicture}?t=${Date.now()}`
+                : "https://via.placeholder.com/100"
+            }
             alt={`${user.firstName} ${user.lastName}`}
             className="w-24 h-24 rounded-full object-cover mr-6 border-4 border-blue-500"
           />
+
           <div>
             <h2 className="text-3xl font-bold text-gray-800">
-              {user.firstName} {user.lastName}
             </h2>
             <p className="text-gray-600">{user.email}</p>
           </div>
@@ -100,30 +111,52 @@ const Dashboard = () => {
           </button>
         </div>
 
-        <section className="posts-section">
-          {posts.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* User Posts Grid */}
+        <section>
+          {loadingPosts ? (
+            <p className="text-center text-gray-600">Loading your posts...</p>
+          ) : posts.length === 0 ? (
+            <p className="text-center text-gray-600">
+              You haven't created any posts yet.
+            </p>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {posts.map((post) => (
-                <div key={post._id} className="post-card bg-white rounded-lg shadow-md overflow-hidden">
-                  {post.postImage && (
+                <div
+                  key={post._id}
+                  className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden cursor-pointer hover:shadow-lg transition"
+                  onClick={() => navigate(`/posts/${post._id}`)}
+                >
+                  {post.images?.length > 0 && (
                     <img
-                      src={`http://localhost:5001${post.postImage}`}
+                      src={`http://localhost:5001${post.images[0]}`}
                       alt={post.title}
-                      className="w-full h-48 object-cover"
+                      className="w-full h-40 object-cover"
                     />
                   )}
+
                   <div className="p-4">
-                    <h4 className="font-bold text-lg mb-2">{post.title}</h4>
-                    <p className="text-gray-700 text-sm mb-4">{post.description}</p>
-                    <div className="flex items-center text-gray-500 text-xs">
-                      <span>Posted on: {new Date(post.createdAt).toLocaleDateString()}</span>
+                    <h2 className="text-lg font-semibold text-gray-900 dark:text-white truncate">
+                      {post.title}
+                    </h2>
+                    <p className="text-gray-700 dark:text-gray-300 mt-1 line-clamp-2">
+                      {post.content}
+                    </p>
+                    <div className="flex justify-between items-center mt-3">
+                      <button
+                        onClick={(e) => handleLike(post._id, e)}
+                        className="text-blue-500 hover:text-blue-700"
+                      >
+                        👍 {post.likes?.length || 0}
+                      </button>
+                      <span className="text-gray-400 text-sm">
+                        {new Date(post.createdAt).toLocaleDateString()}
+                      </span>
                     </div>
                   </div>
                 </div>
               ))}
             </div>
-          ) : (
-            <p className="text-gray-500 text-center">You have not created any posts yet.</p>
           )}
         </section>
       </main>

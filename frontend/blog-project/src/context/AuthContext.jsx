@@ -1,4 +1,3 @@
-// src/context/AuthContext.jsx
 import React, {
   createContext,
   useContext,
@@ -10,32 +9,35 @@ import axios from "axios";
 
 axios.defaults.baseURL = "http://localhost:5001";
 
-// 1. Create the Auth Context
 const AuthContext = createContext(null);
 
-// 2. Create the Auth Provider Component
 export const AuthProvider = ({ children }) => {
-  // This state will now hold the full user object, including the token
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState(null);
+  const [token, setToken] = useState(localStorage.getItem("token") || null);
   const [loading, setLoading] = useState(true);
 
-  // A helper function to get the token, which can be stored separately
-  const getToken = () => {
-    return localStorage.getItem("token");
-  };
-
-  // Function to load user data from the backend
   const loadUser = useCallback(async () => {
-    const token = getToken();
     if (token) {
       axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
       try {
         const res = await axios.get("/api/auth/profile");
-        // Store the user's profile data along with the token in a single object
-        setUser({ ...res.data, token });
+        console.log("loadUser fetched profile:", res.data); // DEBUG log
+
+        // Append timestamp to bust cache for profile picture
+        if (res.data.profilePicture) {
+          res.data.profilePicture = `${res.data.profilePicture
+            }?t=${Date.now()}`;
+        }
+        setUser(res.data);
+        setIsAuthenticated(true);
       } catch (error) {
-        console.error("Error loading user:", error.response?.data?.msg || error.message);
-        logout();
+        console.error("Error loading user:", error);
+        localStorage.removeItem("token");
+        delete axios.defaults.headers.common["Authorization"];
+        setIsAuthenticated(false);
+        setUser(null);
+        setToken(null);
       } finally {
         setLoading(false);
       }
@@ -43,26 +45,30 @@ export const AuthProvider = ({ children }) => {
       setLoading(false);
       setUser(null);
     }
-  }, []);
+  }, [token]);
 
-  // Effect to run loadUser once on component mount
   useEffect(() => {
     loadUser();
   }, [loadUser]);
 
-  // Login function
   const login = async (email, password) => {
     try {
       const res = await axios.post("/api/auth/login", { email, password });
+      const receivedToken = res.data.token;
 
-      // Separate the token from the rest of the user's data
-      const { token, ...userData } = res.data;
+      localStorage.setItem("token", receivedToken);
+      axios.defaults.headers.common[
+        "Authorization"
+      ] = `Bearer ${receivedToken}`;
+      setToken(receivedToken);
 
-      localStorage.setItem("token", token);
-      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-
-      // Store the combined user and token object in the state
-      setUser({ ...userData, token });
+      // Add timestamp to profile picture on login user object too
+      if (res.data.user.profilePicture) {
+        res.data.user.profilePicture = `${res.data.user.profilePicture
+          }?t=${Date.now()}`;
+      }
+      setUser(res.data.user);
+      setIsAuthenticated(true);
 
       return { success: true, message: res.data.msg };
     } catch (error) {
@@ -74,35 +80,21 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Logout function
   const logout = () => {
     localStorage.removeItem("token");
     delete axios.defaults.headers.common["Authorization"];
-    setUser(null); // Set the entire user object to null
-  };
-
-  // Provide the state and functions to children components
-  const authContextValue = {
-    isAuthenticated: !!user,
-    user,
-    loading,
-    login,
-    logout,
-    loadUser,
+    setIsAuthenticated(false);
+    setUser(null);
+    setToken(null);
   };
 
   return (
-    <AuthContext.Provider value={authContextValue}>
+    <AuthContext.Provider
+      value={{ isAuthenticated, user, token, loading, login, logout, loadUser }}
+    >
       {children}
     </AuthContext.Provider>
   );
 };
 
-// 3. Create a Custom Hook to use the Auth Context
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error("useAuth must be used within an AuthProvider");
-  }
-  return context;
-};
+export const useAuth = () => useContext(AuthContext);

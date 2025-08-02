@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef } from "react";
+// src/App.jsx
+import React from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -17,235 +18,10 @@ import ResetPasswordPage from "./pages/resetPasswordPage";
 import Navbar from "./components/navBar";
 import Sidebar from "./components/sideBar.jsx";
 import Dashboard from "./components/dashboard";
-import NewPost from "./components/NewPost.jsx";
-import ChatbotWidget from "./components/ChatbotWidget.jsx"
-import { ArrowLeft, Trash2, Loader2, Plus, Pencil } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-
-// --- EditPost Component ---
-const EditPost = () => {
-  const { id } = useParams();
-  const navigate = useNavigate();
-  const [post, setPost] = useState(null);
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [imageFile, setImageFile] = useState(null);
-  const [imagePreview, setImagePreview] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [success, setSuccess] = useState(false);
-
-  const fileInputRef = useRef(null);
-
-  useEffect(() => {
-    // Fetch the post data for the given ID
-    const fetchPost = async () => {
-      setIsLoading(true);
-      try {
-        const response = await fetch(`http://localhost:5000/api/posts/${id}`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch post');
-        }
-        const data = await response.json();
-        setPost(data);
-        setTitle(data.title);
-        setDescription(data.description);
-        setImagePreview(data.postImage);
-      } catch (err) {
-        console.error("Fetch failed:", err);
-        setError("Failed to load post data.");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchPost();
-  }, [id]);
-
-  const handleImageUpload = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      setImageFile(file);
-      setImagePreview(URL.createObjectURL(file));
-    }
-  };
-
-  const handleDeleteImage = () => {
-    setImageFile(null);
-    setImagePreview(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
-  };
-
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    if (!title || !description || isLoading) return;
-
-    setIsLoading(true);
-    setError(null);
-    setSuccess(false);
-
-    const formData = new FormData();
-    formData.append('title', title);
-    formData.append('description', description);
-
-    if (imageFile) {
-      formData.append('postImage', imageFile);
-    } else if (!imagePreview) {
-      // This handles the case where an image was deleted
-      formData.append('postImage', '');
-    }
-
-    try {
-      const response = await fetch(`http://localhost:5000/api/posts/${id}`, {
-        method: 'PUT', // Use PUT to replace the resource
-        body: formData,
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to update post');
-      }
-
-      setSuccess(true);
-      setTimeout(() => {
-        navigate('/dashboard');
-      }, 1500);
-
-    } catch (err) {
-      console.error("Update failed:", err);
-      setError(err.message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100 font-sans text-gray-800">
-        <Loader2 className="animate-spin h-10 w-10 text-blue-500" />
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100 font-sans text-red-500">
-        {error}
-      </div>
-    );
-  }
-
-  return (
-    <div className="min-h-screen bg-gray-100 font-sans text-gray-800 p-4 max-w-2xl mx-auto">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-8">
-        <button onClick={() => navigate('/dashboard')} className="p-2 text-gray-600 hover:text-gray-800">
-          <ArrowLeft size={24} />
-        </button>
-        <div className="flex items-center">
-          <span className="text-xl font-semibold">Edit Post</span>
-        </div>
-        <div className="w-8" />
-      </div>
-
-      {/* Form Section */}
-      <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-lg p-6 mb-8 space-y-6">
-        {/* Image Upload/Preview Section */}
-        <div>
-          <AnimatePresence mode="wait">
-            {imagePreview ? (
-              <motion.div
-                key="image-preview"
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                className="relative w-full aspect-video rounded-lg overflow-hidden shadow-md"
-              >
-                <img src={imagePreview} alt="Post preview" className="w-full h-full object-cover" />
-                <button
-                  type="button"
-                  onClick={handleDeleteImage}
-                  className="absolute top-2 right-2 p-2 bg-white/70 rounded-full text-red-600 hover:bg-white transition-colors"
-                >
-                  <Trash2 size={24} />
-                </button>
-              </motion.div>
-            ) : (
-              <motion.div
-                key="image-upload"
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                className="w-full h-48 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center cursor-pointer text-gray-400 hover:text-blue-600 hover:border-blue-600 transition-colors"
-                onClick={() => fileInputRef.current.click()}
-              >
-                <span className="flex flex-col items-center">
-                  <span className="text-sm font-medium">Click to upload image</span>
-                  <span className="text-xs text-gray-500 mt-1">Accepts images up to 5MB</span>
-                </span>
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  onChange={handleImageUpload}
-                  className="hidden"
-                  accept="image/*"
-                />
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-
-        {/* Title Input */}
-        <div className="mt-4">
-          <label className="block text-lg font-medium text-gray-700 mb-2">Title</label>
-          <input
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="Enter a captivating title..."
-            className="w-full p-4 text-gray-700 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow"
-            required
-          />
-        </div>
-
-        {/* Description/Content Section */}
-        <div>
-          <label className="block text-lg font-medium text-gray-700 mb-2">Description</label>
-          <textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder="Write your blog post content here..."
-            rows={5}
-            className="w-full p-4 text-gray-700 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow resize-none"
-            required
-          />
-        </div>
-
-        {/* Submission Status and Buttons */}
-        {error && (
-          <p className="text-red-500 text-center text-sm">{error}</p>
-        )}
-        {success && (
-          <p className="text-green-500 text-center text-sm">Post updated successfully!</p>
-        )}
-        <button
-          type="submit"
-          className={`w-full py-4 px-6 rounded-full text-white font-semibold shadow-md transition-colors flex items-center justify-center ${!title || !description || isLoading ? 'bg-blue-300 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'
-            }`}
-          disabled={!title || !description || isLoading}
-        >
-          {isLoading ? (
-            <Loader2 className="animate-spin h-6 w-6" />
-          ) : (
-            <><Pencil className="mr-2" /> Update Post</>
-          )}
-        </button>
-      </form>
-    </div>
-  );
-};
-
+import CreatePost from "./pages/CreatePost.jsx";
+import MyPosts from "./pages/MyPosts.jsx";
+import PostDetails from "./pages/PostDetails.jsx";
+import EditPost from "./pages/EditPost.jsx"; // ✅ Import EditPost
 
 // --- ProtectedRoute Component ---
 const ProtectedRoute = ({ children }) => {
@@ -277,17 +53,13 @@ function App() {
             <Sidebar />
             <main className="flex-1 overflow-y-auto p-4 lg:ml-64 transition-all duration-300 ease-in-out">
               <Routes>
-                {/* Public Routes */}
+                {/* --- Public Routes --- */}
                 <Route path="/" element={<WelcomePage />} />
                 <Route path="/signup" element={<SignUpPage />} />
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/reset-password" element={<ResetPasswordPage />} />
-                <Route
-                  path="/posts"
-                  element={<div>All Posts Page (Public)</div>}
-                />
 
-                {/* Protected Routes - only accessible when authenticated */}
+                {/* --- Protected Routes --- */}
                 <Route
                   path="/dashboard"
                   element={
@@ -300,7 +72,7 @@ function App() {
                   path="/create-post" // Corrected path to match sidebar
                   element={
                     <ProtectedRoute>
-                      <NewPost />
+                      <CreatePost />
                     </ProtectedRoute>
                   }
                 />
@@ -308,12 +80,7 @@ function App() {
                   path="/my-posts"
                   element={
                     <ProtectedRoute>
-                      <h2 className="text-2xl font-bold mb-4 dark:text-white">
-                        My Posts
-                      </h2>
-                      <p className="dark:text-gray-300">
-                        This is a protected page showing only your posts.
-                      </p>
+                      <MyPosts />
                     </ProtectedRoute>
                   }
                 />
@@ -326,7 +93,10 @@ function App() {
                   }
                 />
 
-                {/* Catch-all for undefined routes */}
+                {/* --- Post Details Page --- */}
+                <Route path="/posts/:id" element={<PostDetails />} />
+
+                {/* --- 404 Page --- */}
                 <Route
                   path="*"
                   element={
