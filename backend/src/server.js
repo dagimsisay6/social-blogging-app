@@ -17,6 +17,7 @@ app.use(cors());
 app.use(express.json());
 
 // Define Routes
+// This single line ensures that all routes in authRoutes are accessible under /api/auth
 app.use('/api/auth', authRoutes);
 
 connectDB().then(() => {
