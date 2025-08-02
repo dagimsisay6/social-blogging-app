@@ -1,44 +1,65 @@
-// src/components/Dashboard.jsx
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom"; // Import useNavigate
+import { Plus } from "lucide-react";
 
 const Dashboard = () => {
   const { user, loading } = useAuth();
+  const navigate = useNavigate();
   const [posts, setPosts] = useState([]);
   const [postsLoading, setPostsLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // useEffect to fetch posts when the component mounts
   useEffect(() => {
-    const fetchPosts = async () => {
-      try {
-        const response = await fetch("http://localhost:5001/api/posts");
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-        setPosts(data);
-      } catch (err) {
-        console.error("Failed to fetch posts:", err);
-        setError("Failed to load posts. Please try again later.");
-      } finally {
-        setPostsLoading(false);
-      }
-    };
+    // Only fetch posts if a user is logged in and not currently loading
+    if (!loading && user && user.token) {
+      const fetchMyPosts = async () => {
+        setPostsLoading(true);
+        try {
+          const response = await fetch("http://localhost:5001/api/posts/my-posts", {
+            headers: {
+              'Authorization': `Bearer ${user.token}`,
+            },
+          });
 
-    fetchPosts();
-  }, []); // The empty dependency array ensures this runs only once on mount
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+
+          const data = await response.json();
+          setPosts(data);
+        } catch (err) {
+          console.error("Failed to fetch user's posts:", err);
+          setError("Failed to load your posts. Please try again later.");
+        } finally {
+          setPostsLoading(false);
+        }
+      };
+
+      fetchMyPosts();
+    } else if (!loading && !user) {
+      // If no user is logged in, stop loading and clear posts
+      setPostsLoading(false);
+      setPosts([]);
+    }
+  }, [user, loading]);
 
   if (loading || postsLoading) {
     return <div className="p-6 text-center">Loading your dashboard...</div>;
   }
 
-  if (error) {
-    return <div className="p-6 text-center text-red-600">{error}</div>;
+  // Handle case where user is not logged in after initial loading
+  if (!user) {
+    return (
+      <div className="p-6 text-center">
+        <h2 className="text-2xl font-bold mb-4">Access Denied</h2>
+        <p className="text-gray-600">Please log in to view your personal dashboard.</p>
+      </div>
+    );
   }
 
-  if (!user) {
-    return <div className="p-6 text-center">No user data available</div>;
+  if (error) {
+    return <div className="p-6 text-center text-red-600">{error}</div>;
   }
 
   return (
@@ -54,7 +75,6 @@ const Dashboard = () => {
       </header>
 
       <main className="dashboard-content p-4">
-        {/* User Profile Section (unchanged) */}
         <section className="user-profile bg-white p-6 rounded-lg shadow-md mb-6 flex items-center">
           <img
             src={user.profilePicture || "https://via.placeholder.com/100"}
@@ -69,15 +89,18 @@ const Dashboard = () => {
           </div>
         </section>
 
-        <nav className="flex justify-around border-b border-gray-300 mb-6">
-          <button className="py-3 px-6 border-b-2 border-blue-600 text-blue-600 font-semibold">
-            Posts
+        <div className="flex justify-between items-center mb-6">
+          <h3 className="text-2xl font-bold">My Recent Posts</h3>
+          <button
+            onClick={() => navigate('/new-post')}
+            className="flex items-center space-x-2 py-2 px-4 bg-blue-600 text-white rounded-full shadow-md hover:bg-blue-700 transition-colors"
+          >
+            <Plus size={20} />
+            <span>New Post</span>
           </button>
-        </nav>
+        </div>
 
-        {/* New Posts Section */}
         <section className="posts-section">
-          <h3 className="text-2xl font-bold mb-4">Recent Posts</h3>
           {posts.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {posts.map((post) => (
@@ -100,7 +123,7 @@ const Dashboard = () => {
               ))}
             </div>
           ) : (
-            <p className="text-gray-500 text-center">No posts to display yet.</p>
+            <p className="text-gray-500 text-center">You have not created any posts yet.</p>
           )}
         </section>
       </main>
