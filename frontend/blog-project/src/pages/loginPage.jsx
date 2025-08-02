@@ -1,16 +1,24 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline'; // Assumed to be installed
+// Using inline SVGs for icons to avoid needing an external library
+import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 
 const LoginPage = () => {
   const navigate = useNavigate();
 
-  // State to manage form data
+  // The base URL for your backend API
+  const API_URL = 'http://localhost:5001/api/auth';
+
+  // State to manage form data, updated to use 'email' to match the backend
   const [formData, setFormData] = useState({
-    emailOrUsername: '',
+    email: '',
     password: '',
     rememberMe: false,
   });
+
+  // State to manage UI feedback
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState('');
 
   // State to manage password visibility
   const [showPassword, setShowPassword] = useState(false);
@@ -28,7 +36,7 @@ const LoginPage = () => {
 
   const validateForm = () => {
     const newErrors = {};
-    if (!formData.emailOrUsername) newErrors.emailOrUsername = 'Email/Username is required.';
+    if (!formData.email) newErrors.email = 'Email is required.';
     if (!formData.password) newErrors.password = 'Password is required.';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -36,16 +44,21 @@ const LoginPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setMessage('');
+    setLoading(true);
+
     if (validateForm()) {
-      // Simulate API call to the backend
-      console.log('Login form data submitted:', formData);
       try {
-        const response = await fetch('/api/auth/login', {
+        const response = await fetch(`${API_URL}/login`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify(formData),
+          // Send only the data the backend expects: email and password
+          body: JSON.stringify({
+            email: formData.email,
+            password: formData.password,
+          }),
         });
 
         const data = await response.json();
@@ -53,22 +66,27 @@ const LoginPage = () => {
         if (response.ok) {
           // Handle successful login
           console.log('Login successful:', data);
-          // TODO: Store JWT token in local storage or a state management solution
-          // TODO: Redirect to dashboard
-          navigate('/dashboard'); // Assuming a dashboard route
+          // Store the JWT token from the backend in localStorage
+          localStorage.setItem('token', data.token);
+          setMessage('Login successful! Redirecting to dashboard...');
+
+          // Redirect to dashboard after a delay
+          setTimeout(() => {
+            navigate('/dashboard');
+          }, 2000);
         } else {
           // Handle server-side validation or other errors
-          console.error('Login failed:', data.message);
-          // TODO: Show an error popup to the user
+          console.error('Login failed:', data.msg);
+          setMessage(`Error: ${data.msg || 'An error occurred.'}`);
         }
       } catch (error) {
         console.error('Network error:', error);
-        // TODO: Show a network error popup
+        setMessage('Network error. Please try again later.');
       }
     }
+    setLoading(false);
   };
 
-  // Basic Google login handler (placeholder)
   const handleGoogleLogin = () => {
     console.log('Google login clicked');
     // TODO: Implement Google OAuth flow
@@ -96,18 +114,18 @@ const LoginPage = () => {
 
         {/* Login Form */}
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Name/Email Field */}
+          {/* Email Field */}
           <div>
-            <label className="block text-gray-700 font-semibold mb-2">Name</label>
+            <label className="block text-gray-700 font-semibold mb-2">Email</label>
             <input
               type="text"
-              name="emailOrUsername"
-              value={formData.emailOrUsername}
+              name="email"
+              value={formData.email}
               onChange={handleChange}
-              placeholder="name"
-              className={`w-full p-3 rounded-lg border-2 ${errors.emailOrUsername ? 'border-red-500' : 'border-gray-300'} focus:outline-none focus:border-blue-500 transition-colors`}
+              placeholder="johndoe@example.com"
+              className={`w-full p-3 rounded-lg border-2 ${errors.email ? 'border-red-500' : 'border-gray-300'} focus:outline-none focus:border-blue-500 transition-colors`}
             />
-            {errors.emailOrUsername && <p className="text-red-500 text-sm mt-1">{errors.emailOrUsername}</p>}
+            {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
           </div>
 
           {/* Password Field */}
@@ -168,9 +186,17 @@ const LoginPage = () => {
           <button
             type="submit"
             className="w-full py-3 bg-blue-700 text-white font-semibold rounded-xl shadow-md hover:bg-blue-800 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+            disabled={loading}
           >
-            Log In
+            {loading ? 'Logging In...' : 'Log In'}
           </button>
+
+          {/* Display general message */}
+          {message && (
+            <p className="mt-4 text-center text-sm font-medium">
+              {message}
+            </p>
+          )}
         </form>
 
         {/* Separator */}

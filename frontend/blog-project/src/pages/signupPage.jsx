@@ -4,6 +4,9 @@ import { useNavigate } from 'react-router-dom';
 const SignUpPage = () => {
   const navigate = useNavigate();
 
+  // The base URL for your backend API
+  const API_URL = 'http://localhost:5001/api/auth';
+
   // State to manage form data
   const [formData, setFormData] = useState({
     firstName: '',
@@ -13,6 +16,10 @@ const SignUpPage = () => {
     confirmPassword: '',
     agreedToTerms: false,
   });
+
+  // State to manage UI feedback
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState('');
 
   // State to manage password visibility
   const [showPassword, setShowPassword] = useState(false);
@@ -55,35 +62,46 @@ const SignUpPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setMessage('');
+    setLoading(true);
+
     if (validateForm()) {
-      // Simulate API call to the backend
-      console.log('Form data submitted:', formData);
       try {
-        const response = await fetch('/api/auth/signup', {
+        const response = await fetch(`${API_URL}/signup`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify(formData),
+          // Only send the data that the backend API expects
+          body: JSON.stringify({
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            email: formData.email,
+            password: formData.password,
+          }),
         });
 
         const data = await response.json();
 
         if (response.ok) {
           // Handle successful signup
+          setMessage('Signup successful! Redirecting to login...');
           console.log('Signup successful:', data);
-          // TODO: Redirect to dashboard or login page
-          navigate('/dashboard'); // Assuming a dashboard route
+          // Redirect to the login page after a delay
+          setTimeout(() => {
+            navigate('/login');
+          }, 2000);
         } else {
           // Handle server-side validation or other errors
-          console.error('Signup failed:', data.message);
-          // TODO: Show an error popup to the user
+          console.error('Signup failed:', data.msg);
+          setMessage(`Error: ${data.msg || 'An error occurred.'}`);
         }
       } catch (error) {
         console.error('Network error:', error);
-        // TODO: Show a network error popup
+        setMessage('Network error. Please try again later.');
       }
     }
+    setLoading(false);
   };
 
   return (
@@ -244,9 +262,17 @@ const SignUpPage = () => {
           <button
             type="submit"
             className="w-full py-3 bg-blue-700 text-white font-semibold rounded-xl shadow-md hover:bg-blue-800 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+            disabled={loading}
           >
-            Sign Up
+            {loading ? 'Signing Up...' : 'Sign Up'}
           </button>
+
+          {/* Display general message */}
+          {message && (
+            <p className="mt-4 text-center text-sm font-medium">
+              {message}
+            </p>
+          )}
         </form>
       </div>
     </div>
