@@ -4,14 +4,14 @@ import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 
 // Generate JWT token
-export const generateToken = (id) => {
+const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
     expiresIn: "30d",
   });
 };
 
 // Middleware to protect routes
-export const protect = async (req, res, next) => {
+const protect = async (req, res, next) => {
   let token;
 
   if (

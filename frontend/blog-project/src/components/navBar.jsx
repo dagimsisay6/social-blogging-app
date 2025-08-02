@@ -16,6 +16,9 @@ const Navbar = () => {
   const [showPictureUploader, setShowPictureUploader] = useState(false);
   const dropdownRef = useRef(null);
 
+  // Define your server's base URL here
+  const serverUrl = "http://localhost:5001";
+
   const defaultProfilePic =
     "https://via.placeholder.com/40/A78BFA/FFFFFF?text=U";
 
@@ -127,7 +130,7 @@ const Navbar = () => {
                 <img
                   src={
                     user?.profilePicture
-                      ? `${user.profilePicture}?t=${Date.now()}`
+                      ? `${serverUrl}${user.profilePicture}` // The new image URL will have the cache-busting `?t=...` added by AuthContext
                       : defaultProfilePic
                   }
                   alt="Profile"

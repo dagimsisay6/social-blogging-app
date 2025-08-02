@@ -9,11 +9,15 @@ const Dashboard = () => {
   const [loadingPosts, setLoadingPosts] = useState(true);
   const navigate = useNavigate();
 
+  // Define your server's base URL here, just like in Navbar
+  const serverUrl = "http://localhost:5001";
+  const defaultPlaceholder = "https://via.placeholder.com/100";
+
   // Fetch the user's posts
   const fetchUserPosts = async () => {
     if (!token) return;
     try {
-      const res = await axios.get("http://localhost:5001/api/posts/my-posts", {
+      const res = await axios.get(`${serverUrl}/api/posts/my-posts`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setPosts(res.data);
@@ -30,10 +34,10 @@ const Dashboard = () => {
 
   // Handle like toggle
   const handleLike = async (id, e) => {
-    e.stopPropagation(); // ⛔ Stop the card click
+    e.stopPropagation();
     try {
       const res = await axios.post(
-        `http://localhost:5001/api/posts/${id}/like`,
+        `${serverUrl}/api/posts/${id}/like`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -54,18 +58,8 @@ const Dashboard = () => {
     return <div className="p-6 text-center">Loading your dashboard...</div>;
   }
 
-  // Handle case where user is not logged in after initial loading
   if (!user) {
-    return (
-      <div className="p-6 text-center">
-        <h2 className="text-2xl font-bold mb-4">Access Denied</h2>
-        <p className="text-gray-600">Please log in to view your personal dashboard.</p>
-      </div>
-    );
-  }
-
-  if (error) {
-    return <div className="p-6 text-center text-red-600">{error}</div>;
+    return <div className="p-6 text-center">No user data available</div>;
   }
 
   return (
@@ -85,9 +79,10 @@ const Dashboard = () => {
         <section className="user-profile bg-white p-6 rounded-lg shadow-md mb-6 flex items-center">
           <img
             src={
+              // <<<--- FIXED LINE 1: Prepend serverUrl to the user's profile picture
               user.profilePicture
-                ? `${user.profilePicture}?t=${Date.now()}`
-                : "https://via.placeholder.com/100"
+                ? `${serverUrl}${user.profilePicture}`
+                : defaultPlaceholder
             }
             alt={`${user.firstName} ${user.lastName}`}
             className="w-24 h-24 rounded-full object-cover mr-6 border-4 border-blue-500"
@@ -95,21 +90,17 @@ const Dashboard = () => {
 
           <div>
             <h2 className="text-3xl font-bold text-gray-800">
+              {user.firstName} {user.lastName}
             </h2>
             <p className="text-gray-600">{user.email}</p>
           </div>
         </section>
 
-        <div className="flex justify-between items-center mb-6">
-          <h3 className="text-2xl font-bold">My Recent Posts</h3>
-          <button
-            onClick={() => navigate('/new-post')}
-            className="flex items-center space-x-2 py-2 px-4 bg-blue-600 text-white rounded-full shadow-md hover:bg-blue-700 transition-colors"
-          >
-            <Plus size={20} />
-            <span>New Post</span>
+        <nav className="flex justify-around border-b border-gray-300 mb-6">
+          <button className="py-3 px-6 border-b-2 border-blue-600 text-blue-600 font-semibold">
+            Posts
           </button>
-        </div>
+        </nav>
 
         {/* User Posts Grid */}
         <section>
@@ -129,7 +120,8 @@ const Dashboard = () => {
                 >
                   {post.images?.length > 0 && (
                     <img
-                      src={`http://localhost:5001${post.images[0]}`}
+                      // <<<--- FIXED LINE 2: Prepend serverUrl to the post image
+                      src={`${serverUrl}${post.images[0]}`}
                       alt={post.title}
                       className="w-full h-40 object-cover"
                     />
@@ -163,5 +155,4 @@ const Dashboard = () => {
     </div>
   );
 };
-
 export default Dashboard;

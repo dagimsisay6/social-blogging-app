@@ -21,7 +21,8 @@ import Dashboard from "./components/dashboard";
 import CreatePost from "./pages/CreatePost.jsx";
 import MyPosts from "./pages/MyPosts.jsx";
 import PostDetails from "./pages/PostDetails.jsx";
-import EditPost from "./pages/EditPost.jsx"; // ✅ Import EditPost
+import EditPost from "./pages/EditPost.jsx";
+import ChatbotWidget from "./components/ChatbotWidget.jsx"
 
 // --- ProtectedRoute Component ---
 const ProtectedRoute = ({ children }) => {
