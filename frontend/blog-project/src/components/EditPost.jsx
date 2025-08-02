@@ -1,32 +1,14 @@
-import React, { useState, useEffect, useRef } from "react";
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Navigate,
-  Link,
-  useParams,
-  useNavigate,
-} from "react-router-dom";
-import { AuthProvider, useAuth } from "./context/AuthContext.jsx";
-import { SidebarProvider } from "./context/SideBarContext.jsx";
-import WelcomePage from "./pages/welcomePage";
-import SignUpPage from "./pages/signupPage";
-import LoginPage from "./pages/loginPage";
-import ResetPasswordPage from "./pages/resetPasswordPage";
-import Navbar from "./components/navBar";
-import Sidebar from "./components/sideBar.jsx";
-import Dashboard from "./components/dashboard";
-import NewPost from "./components/NewPost.jsx";
-import ChatbotWidget from "./components/ChatbotWidget.jsx"
-import { ArrowLeft, Trash2, Loader2, Plus, Pencil } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { ArrowLeft, Trash2, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useAuth } from '../context/AuthContext';
 
-// --- EditPost Component ---
 const EditPost = () => {
-  const { id } = useParams();
+  const { id } = useParams(); // Get the post ID from the URL
   const navigate = useNavigate();
-  const [post, setPost] = useState(null);
+  const { user, loading } = useAuth();
+
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [imageFile, setImageFile] = useState(null);
@@ -37,29 +19,47 @@ const EditPost = () => {
 
   const fileInputRef = useRef(null);
 
+  // Effect to fetch post data when the component loads
   useEffect(() => {
-    // Fetch the post data for the given ID
     const fetchPost = async () => {
+      if (!user || !user.token) {
+        setError('You must be logged in to edit a post.');
+        return;
+      }
       setIsLoading(true);
       try {
-        const response = await fetch(`http://localhost:5000/api/posts/${id}`);
+        const response = await fetch(`http://localhost:5001/api/posts/${id}`, {
+          headers: {
+            'Authorization': `Bearer ${user.token}`,
+          },
+        });
+
         if (!response.ok) {
-          throw new Error('Failed to fetch post');
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Failed to fetch post for editing.');
         }
-        const data = await response.json();
-        setPost(data);
-        setTitle(data.title);
-        setDescription(data.description);
-        setImagePreview(data.postImage);
+
+        const postData = await response.json();
+
+        // Pre-fill form fields with fetched data
+        setTitle(postData.title);
+        setDescription(postData.description);
+        if (postData.postImage) {
+          // Set the image preview from the backend
+          setImagePreview(`http://localhost:5001${postData.postImage}`);
+        }
       } catch (err) {
-        console.error("Fetch failed:", err);
-        setError("Failed to load post data.");
+        console.error("Failed to fetch post:", err);
+        setError(err.message);
       } finally {
         setIsLoading(false);
       }
     };
-    fetchPost();
-  }, [id]);
+
+    if (id && user && user.token && !loading) {
+      fetchPost();
+    }
+  }, [id, user, loading]);
 
   const handleImageUpload = (event) => {
     const file = event.target.files[0];
@@ -79,6 +79,12 @@ const EditPost = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+
+    if (!user || !user.token) {
+      setError('You must be logged in to edit a post.');
+      return;
+    }
+
     if (!title || !description || isLoading) return;
 
     setIsLoading(true);
@@ -88,17 +94,16 @@ const EditPost = () => {
     const formData = new FormData();
     formData.append('title', title);
     formData.append('description', description);
-
     if (imageFile) {
       formData.append('postImage', imageFile);
-    } else if (!imagePreview) {
-      // This handles the case where an image was deleted
-      formData.append('postImage', '');
     }
 
     try {
-      const response = await fetch(`http://localhost:5000/api/posts/${id}`, {
-        method: 'PUT', // Use PUT to replace the resource
+      const response = await fetch(`http://localhost:5001/api/posts/${id}`, {
+        method: 'PUT', // <-- We use PUT for updating
+        headers: {
+          'Authorization': `Bearer ${user.token}`,
+        },
         body: formData,
       });
 
@@ -109,7 +114,7 @@ const EditPost = () => {
 
       setSuccess(true);
       setTimeout(() => {
-        navigate('/dashboard');
+        navigate('/my-posts');
       }, 1500);
 
     } catch (err) {
@@ -120,27 +125,19 @@ const EditPost = () => {
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100 font-sans text-gray-800">
-        <Loader2 className="animate-spin h-10 w-10 text-blue-500" />
-      </div>
-    );
+  if (loading || isLoading) {
+    return <div className="p-6 text-center">Loading post...</div>;
   }
 
   if (error) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100 font-sans text-red-500">
-        {error}
-      </div>
-    );
+    return <div className="p-6 text-center text-red-600">{error}</div>;
   }
 
   return (
     <div className="min-h-screen bg-gray-100 font-sans text-gray-800 p-4 max-w-2xl mx-auto">
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
-        <button onClick={() => navigate('/dashboard')} className="p-2 text-gray-600 hover:text-gray-800">
+        <button onClick={() => navigate('/my-posts')} className="p-2 text-gray-600 hover:text-gray-800">
           <ArrowLeft size={24} />
         </button>
         <div className="flex items-center">
@@ -238,7 +235,7 @@ const EditPost = () => {
           {isLoading ? (
             <Loader2 className="animate-spin h-6 w-6" />
           ) : (
-            <><Pencil className="mr-2" /> Update Post</>
+            'Update Post'
           )}
         </button>
       </form>
@@ -246,114 +243,4 @@ const EditPost = () => {
   );
 };
 
-
-// --- ProtectedRoute Component ---
-const ProtectedRoute = ({ children }) => {
-  const { isAuthenticated, loading } = useAuth();
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
-        Loading authentication...
-      </div>
-    );
-  }
-
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
-
-  return children;
-};
-
-// --- Main App Component ---
-function App() {
-  return (
-    <Router>
-      <AuthProvider>
-        <SidebarProvider>
-          <Navbar />
-          <div className="flex h-[calc(100vh-64px)] overflow-hidden">
-            <Sidebar />
-            <main className="flex-1 overflow-y-auto p-4 lg:ml-64 transition-all duration-300 ease-in-out">
-              <Routes>
-                {/* Public Routes */}
-                <Route path="/" element={<WelcomePage />} />
-                <Route path="/signup" element={<SignUpPage />} />
-                <Route path="/login" element={<LoginPage />} />
-                <Route path="/reset-password" element={<ResetPasswordPage />} />
-                <Route
-                  path="/posts"
-                  element={<div>All Posts Page (Public)</div>}
-                />
-
-                {/* Protected Routes - only accessible when authenticated */}
-                <Route
-                  path="/dashboard"
-                  element={
-                    <ProtectedRoute>
-                      <Dashboard />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/create-post" // Corrected path to match sidebar
-                  element={
-                    <ProtectedRoute>
-                      <NewPost />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/my-posts"
-                  element={
-                    <ProtectedRoute>
-                      <h2 className="text-2xl font-bold mb-4 dark:text-white">
-                        My Posts
-                      </h2>
-                      <p className="dark:text-gray-300">
-                        This is a protected page showing only your posts.
-                      </p>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/edit-post/:id"
-                  element={
-                    <ProtectedRoute>
-                      <EditPost />
-                    </ProtectedRoute>
-                  }
-                />
-
-                {/* Catch-all for undefined routes */}
-                <Route
-                  path="*"
-                  element={
-                    <div className="flex flex-col items-center justify-center h-full text-gray-700 dark:text-gray-300">
-                      <h1 className="text-4xl font-bold mb-4">
-                        404 - Page Not Found
-                      </h1>
-                      <p className="text-lg">
-                        The page you are looking for does not exist.
-                      </p>
-                      <Link
-                        to="/"
-                        className="mt-6 text-blue-600 dark:text-blue-400 hover:underline"
-                      >
-                        Go to Home
-                      </Link>
-                    </div>
-                  }
-                />
-              </Routes>
-            </main>
-            <ChatbotWidget />
-          </div>
-        </SidebarProvider>
-      </AuthProvider>
-    </Router>
-  );
-}
-
-export default App;
+export default EditPost;
