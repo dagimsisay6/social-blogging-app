@@ -66,6 +66,22 @@ class TrendBasedWritingRequest(BaseModel):
     target_audience: Optional[str] = "general readers"
     post_length: Optional[str] = "medium-length"
 
+class InvokePayload(BaseModel):
+    question: Optional[str] = None
+    topic: Optional[str] = None
+    content_to_summarize: Optional[str] = None
+    editing_goal: Optional[str] = None
+    draft_content: Optional[str] = None
+
+class InvokeRequest(BaseModel):
+    action: str
+    payload: InvokePayload
+    conversation_id: Optional[str] = None
+
+class InvokeResponse(BaseModel):
+    response: str
+    conversation_id: str
+
 class BlogPostData(BaseModel):
     post_id: str
     title: str
@@ -286,6 +302,96 @@ async def trend_based_writing(request: TrendBasedWritingRequest):
         raise HTTPException(
             status_code=500,
             detail=f"Failed to generate trend-based content: {str(e)}"
+        )
+
+# --- UNIFIED INVOKE ENDPOINT ---
+
+@app.post("/api/v1/invoke", response_model=InvokeResponse)
+async def unified_invoke(request: InvokeRequest):
+    """Unified AI endpoint that routes to different AI functions based on action."""
+    try:
+        # Generate or use existing conversation ID
+        conversation_id = request.conversation_id or f"conv_{datetime.now().timestamp()}"
+        
+        logger.info(f"Processing action: {request.action} for conversation: {conversation_id}")
+        
+        # Route to appropriate function based on action
+        if request.action == "chat":
+            if not request.payload.question:
+                raise HTTPException(status_code=400, detail="Question is required for chat action")
+            
+            # Get chat history for this conversation (simplified - in production use proper session storage)
+            session = get_or_create_session(conversation_id)
+            chat_history = format_chat_history(session)
+            
+            # Get relevant context from RAG system
+            retrieved_context = rag_system.get_context_for_chat(request.payload.question)
+            
+            # Execute chat response
+            result = execute_chat_response(
+                chat_history=chat_history,
+                retrieved_context=retrieved_context,
+                user_question=request.payload.question
+            )
+            
+            # Add to session
+            add_to_session(conversation_id, request.payload.question, str(result))
+            
+            response_text = str(result)
+            
+        elif request.action == "discover_trends":
+            if not request.payload.topic:
+                raise HTTPException(status_code=400, detail="Topic is required for discover_trends action")
+            
+            result = execute_trend_discovery(request.payload.topic)
+            response_text = str(result)
+            
+        elif request.action == "trend_based_write":
+            if not request.payload.topic:
+                raise HTTPException(status_code=400, detail="Topic is required for trend_based_write action")
+            
+            result = execute_trend_based_writing(
+                trend_topic=request.payload.topic,
+                target_audience="general readers",
+                post_length="medium-length"
+            )
+            response_text = str(result)
+            
+        elif request.action == "summarize":
+            if not request.payload.content_to_summarize:
+                raise HTTPException(status_code=400, detail="Content is required for summarize action")
+            
+            result = execute_content_summary(
+                request.payload.content_to_summarize,
+                "one paragraph"
+            )
+            response_text = str(result)
+            
+        elif request.action == "edit":
+            if not request.payload.editing_goal or not request.payload.draft_content:
+                raise HTTPException(status_code=400, detail="Both editing_goal and draft_content are required for edit action")
+            
+            result = execute_post_editing(
+                request.payload.draft_content,
+                request.payload.editing_goal
+            )
+            response_text = str(result)
+            
+        else:
+            raise HTTPException(status_code=400, detail=f"Unknown action: {request.action}")
+        
+        return InvokeResponse(
+            response=response_text,
+            conversation_id=conversation_id
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error in unified invoke: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to process request: {str(e)}"
         )
 
 # --- BLOG POST MANAGEMENT ENDPOINTS ---

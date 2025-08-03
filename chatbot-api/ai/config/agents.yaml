@@ -12,7 +12,7 @@ content_summarizer:
   role: >
     Content Summarizer
   goal: >
-   Summarize content in a concise and professional way without losing it's essence.
+   Summarize content in a concise and professional way without losing its essence.
   backstory: >
     You are an expert at summarizing content in a concise and professional manner. You can take a large corpus of text and produce a shorter version that captures the main idea.
 

@@ -1,12 +1,13 @@
 import React, { useState, useRef, useEffect, memo } from "react";
-import { User, Send, ChevronLeft, MessageSquareText } from "lucide-react";
+import { User, Send, ChevronLeft, MessageSquareText, Search, BookText, PenSquare, Sparkles } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import botAvatar from "../assets/bot.png";
 import thinkingDots from "../assets/loading.png";
 
-const AI_API_URL =
-  "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent";
-const API_KEY = "";
+// --- CONFIGURATION ---
+// This should point to YOUR single, smart AI backend endpoint.
+const AI_API_URL = "http://localhost:8000/api/v1/invoke"; // Example: Use your actual Render/Railway URL
+
 const ChatMessage = memo(({ message }) => {
   const isUser = message.sender === "user";
   const isThinking = message.isThinking;
@@ -20,21 +21,13 @@ const ChatMessage = memo(({ message }) => {
         isUser ? "justify-end" : "justify-start"
       }`}
     >
-      {/* Conditionally render the avatar based on sender and state */}
       {!isUser && (
         <div className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center p-1 bg-white shadow-sm">
-          <img
-            src={botAvatar}
-            alt="AI Avatar"
-            className="w-full h-full object-cover"
-          />
+          <img src={botAvatar} alt="AI Avatar" className="w-full h-full object-cover" />
         </div>
       )}
-
-      {/* Conditionally render loading image or message text */}
       {isThinking ? (
         <div className="flex items-center justify-center p-2">
-          {/* Removed background and made the image larger as requested */}
           <img src={thinkingDots} alt="Thinking..." className="h-8 w-auto" />
         </div>
       ) : (
@@ -45,10 +38,13 @@ const ChatMessage = memo(({ message }) => {
               : "bg-blue-600 text-white shadow-md rounded-bl-none"
           }`}
         >
-          <p className="font-sans text-sm">{message.text}</p>
+          {/* Using dangerouslySetInnerHTML to render Markdown from the backend */}
+          <div
+            className="font-sans text-sm prose prose-invert"
+            dangerouslySetInnerHTML={{ __html: message.text.replace(/\n/g, '<br />') }}
+          />
         </div>
       )}
-
       {isUser && (
         <div className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center p-1 bg-white shadow-sm">
           <User size={20} className="text-gray-500" />
@@ -61,105 +57,114 @@ const ChatMessage = memo(({ message }) => {
 const ChatbotWidget = () => {
   const [isChatbotOpen, setIsChatbotOpen] = useState(false);
   const [messages, setMessages] = useState([
-    {
-      sender: "ai",
-      text: "Hello! I'm Bloggy, your AI writing assistant. Need help writing your first post?",
-      isThinking: false,
-    },
+    { sender: "ai", text: "Hello! I'm your AI assistant. Use the tools below or ask me a question about the blog." },
   ]);
   const [inputMessage, setInputMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [conversationId, setConversationId] = useState(null); // To manage session state
   const messagesEndRef = useRef(null);
+  const inputRef = useRef(null);
 
-  const suggestionPrompts = [
-    "Would you like to schedule this post or publish now?",
-    "Would you like blog title suggestions?",
-    "Want to add an image with alt text?",
-    "Do you want me to check your blog for clarity and tone?",
-  ];
-
-  // Effect to scroll to the bottom of the chat window
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, isChatbotOpen]);
+  }, [messages]);
+
+  const handleActionClick = (command) => {
+    setInputMessage(command + ": ");
+    inputRef.current?.focus();
+  };
 
   const handleSendMessage = async (textToSend) => {
     if (!textToSend.trim() || isLoading) return;
 
-    // Add user's message
+    // --- FRONTEND MESSAGE HANDLING ---
     const newUserMessage = { sender: "user", text: textToSend };
-    setMessages((prevMessages) => [...prevMessages, newUserMessage]);
-
+    setMessages((prev) => [...prev, newUserMessage]);
     setInputMessage("");
     setIsLoading(true);
+    setMessages((prev) => [...prev, { sender: "ai", text: "", isThinking: true }]);
 
-    // Add thinking message
-    const thinkingMessage = { sender: "ai", text: "", isThinking: true };
-    setMessages((prevMessages) => [...prevMessages, thinkingMessage]);
+    // --- BACKEND EXPECTATION: PARSE THE MESSAGE TO DEFINE ACTION ---
+    let action = "chat";
+    let payload = { question: textToSend };
 
-    // Simulate network delay for better UX
-    await new Promise((resolve) => setTimeout(resolve, 800));
-
+    const commandMatch = textToSend.match(/^([A-Z_]+):\s*(.*)/);
+    if (commandMatch) {
+      const command = commandMatch[1].toUpperCase();
+      const content = commandMatch[2];
+      
+      switch (command) {
+        case "TRENDS":
+          action = "discover_trends";
+          payload = { topic: content };
+          break;
+        case "WRITE_FROM_TREND":
+          action = "trend_based_write";
+          payload = { topic: content };
+          break;
+        case "SUMMARIZE":
+          action = "summarize";
+          payload = { content_to_summarize: content };
+          break;
+        case "EDIT":
+          action = "edit";
+          // A simple split for demo purposes. A better UI might have two fields.
+          const [goal, ...draftParts] = content.split('DRAFT:');
+          payload = { editing_goal: goal.trim(), draft_content: (draftParts.join('DRAFT:') || '').trim() };
+          break;
+        default:
+          action = "chat";
+          payload = { question: textToSend };
+      }
+    }
+    
+    // --- API CALL ---
     try {
-      // Build chat history for API call
-      const chatHistory = [...messages, newUserMessage].map((m) => ({
-        role: m.sender === "ai" ? "model" : "user",
-        parts: [{ text: m.text }],
-      }));
-
-      const payload = { contents: chatHistory };
-
       const response = await fetch(AI_API_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({
+          action,
+          payload,
+          conversation_id: conversationId,
+        }),
       });
 
-      const result = await response.json();
-
-      // Remove thinking message
-      setMessages((prevMessages) => prevMessages.filter((m) => !m.isThinking));
-
-      if (result.candidates?.[0]?.content?.parts?.[0]?.text) {
-        const text = result.candidates[0].content.parts[0].text;
-        setMessages((prevMessages) => [
-          ...prevMessages,
-          { sender: "ai", text, isThinking: false },
-        ]);
-      } else {
-        setMessages((prevMessages) => [
-          ...prevMessages,
-          {
-            sender: "ai",
-            text: "I'm sorry, I couldn't generate a response. Please try again.",
-            isThinking: false,
-          },
-        ]);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
+
+      const result = await response.json();
+      
+      // Update conversation ID if it's the first message
+      if (result.conversation_id && !conversationId) {
+        setConversationId(result.conversation_id);
+      }
+
+      setMessages((prev) => prev.filter((m) => !m.isThinking));
+      setMessages((prev) => [...prev, { sender: "ai", text: result.response }]);
+
     } catch (error) {
       console.error("API call failed:", error);
-      // Remove thinking message and show error
-      setMessages((prevMessages) => prevMessages.filter((m) => !m.isThinking));
-      setMessages((prevMessages) => [
-        ...prevMessages,
-        {
-          sender: "ai",
-          text: "A network error occurred. Please try again.",
-          isThinking: false,
-        },
-      ]);
+      setMessages((prev) => prev.filter((m) => !m.isThinking));
+      setMessages((prev) => [...prev, { sender: "ai", text: "Sorry, I ran into an error. Please try again." }]);
     } finally {
       setIsLoading(false);
     }
   };
+  
+  // Action buttons definition
+  const actionButtons = [
+    { label: "Find Trends", command: "TRENDS", icon: <Search size={16}/> },
+    { label: "Summarize Text", command: "SUMMARIZE", icon: <BookText size={16}/> },
+    { label: "Edit Draft", command: "EDIT", icon: <PenSquare size={16}/> },
+    { label: "Write From Trend", command: "WRITE_FROM_TREND", icon: <Sparkles size={16}/> },
+  ];
 
   return (
-    <div className="font-sans">
+    <>
       {!isChatbotOpen && (
         <motion.button
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ duration: 0.5 }}
           onClick={() => setIsChatbotOpen(true)}
           className="fixed bottom-6 right-6 z-50 p-4 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition-colors"
         >
@@ -173,83 +178,41 @@ const ChatbotWidget = () => {
             initial={{ opacity: 0, scale: 0.9, y: 50 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 50 }}
-            transition={{ duration: 0.3 }}
-            className="fixed bottom-3 right-3 z-50 w-[95vw] max-w-md h-[92vh] md:h-[92vh] md:w-96 md:bottom-6 md:right-6 bg-gray-50 md:rounded-2xl md:shadow-2xl flex flex-col overflow-hidden"
+            className="fixed bottom-3 right-3 z-50 w-[95vw] max-w-md h-[92vh] md:h-[92vh] md:w-96 md:bottom-6 md:right-6 bg-gray-50 md:rounded-2xl md:shadow-2xl flex flex-col font-sans"
           >
             {/* Header */}
             <div className="flex items-center justify-between p-4 bg-white shadow-sm">
-              <button
-                onClick={() => setIsChatbotOpen(false)}
-                className="text-gray-600 hover:text-gray-800 transition-colors"
-              >
-                <ChevronLeft size={24} />
-              </button>
-              <div className="flex-1 text-center flex items-center justify-center">
-                <img src={botAvatar} alt="AI Avatar" className="w-8 h-8 mr-2" />
-                <h1 className="text-xl font-bold text-gray-800">Ask Bloggy</h1>
-              </div>
+              <button onClick={() => setIsChatbotOpen(false)} className="text-gray-600"><ChevronLeft size={24} /></button>
+              <h1 className="text-xl font-bold text-gray-800">AI Assistant</h1>
               <div className="w-6" />
             </div>
 
-            {/* Messages container with a fixed scrollbar */}
-            <div className="flex-1 p-4 overflow-y-scroll space-y-4 scroll-smooth">
-              {messages.map((message, index) => (
-                <ChatMessage key={index} message={message} />
-              ))}
-              <div ref={messagesEndRef} />
-            </div>
+            {/* Messages */}
+            <div className="flex-1 p-4 overflow-y-auto space-y-4 scroll-smooth">{messages.map((msg, i) => <ChatMessage key={i} message={msg} />)}<div ref={messagesEndRef} /></div>
 
-            {/* Suggestions */}
-            <div className="p-4 bg-gray-100 border-t border-gray-200 space-y-2">
-              <h3 className="text-center text-sm font-semibold text-gray-500">
-                Suggestion prompts
-              </h3>
-              <div className="grid grid-cols-2 gap-2">
-                {suggestionPrompts.map((prompt, index) => (
-                  <motion.button
-                    key={index}
-                    initial={{ scale: 0.9, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{ duration: 0.2, delay: 0.1 }}
-                    onClick={() => handleSendMessage(prompt)}
-                    className="p-3 bg-blue-800 text-white text-xs font-medium rounded-lg hover:bg-blue-900 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    {prompt}
-                  </motion.button>
-                ))}
-              </div>
+            {/* Quick Actions */}
+            <div className="p-3 bg-gray-100 border-t border-gray-200">
+                <p className="text-center text-xs font-semibold text-gray-500 mb-2">QUICK ACTIONS</p>
+                <div className="grid grid-cols-2 gap-2">
+                    {actionButtons.map(({label, command, icon}) => (
+                         <button key={command} onClick={() => handleActionClick(command)} className="flex items-center justify-center gap-2 p-2 bg-white text-blue-800 text-xs font-medium rounded-lg hover:bg-blue-50 transition-colors border border-gray-200">
+                            {icon} {label}
+                         </button>
+                    ))}
+                </div>
             </div>
 
             {/* Input */}
             <div className="p-4 bg-white border-t border-gray-200">
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  handleSendMessage(inputMessage);
-                }}
-                className="flex items-center gap-2"
-              >
-                <input
-                  type="text"
-                  value={inputMessage}
-                  onChange={(e) => setInputMessage(e.target.value)}
-                  placeholder="Write a comment..."
-                  className="flex-1 p-3 rounded-full bg-gray-100 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow"
-                  disabled={isLoading}
-                />
-                <button
-                  type="submit"
-                  className="p-3 bg-blue-600 text-white rounded-full shadow-md hover:bg-blue-700 transition-colors"
-                  disabled={isLoading}
-                >
-                  <Send size={24} />
-                </button>
+              <form onSubmit={(e) => { e.preventDefault(); handleSendMessage(inputMessage); }} className="flex items-center gap-2">
+                <input ref={inputRef} type="text" value={inputMessage} onChange={(e) => setInputMessage(e.target.value)} placeholder="Ask a question or use an action..." className="flex-1 p-3 rounded-full bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500" disabled={isLoading} />
+                <button type="submit" className="p-3 bg-blue-600 text-white rounded-full shadow-md" disabled={isLoading}><Send size={24} /></button>
               </form>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </>
   );
 };
 
