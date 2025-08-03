@@ -3,7 +3,7 @@ import { Routes, Route } from "react-router-dom";
 import WelcomePage from "./pages/welcomePage";
 import SignUpPage from "./pages/signupPage";
 import LoginPage from "./pages/loginPage";
-import Dashboard from "./components/dashboard";
+import ResetPasswordPage from "./pages/resetPasswordPage"; // Import the new component
 
 function App() {
   return (
@@ -15,10 +15,11 @@ function App() {
         {/* Sign Up Page route */}
         <Route path="/signup" element={<SignUpPage />} />
 
-        {/* You can add more routes here as needed */}
+        {/* Login Page route */}
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        {/* <Route path="/dashboard" element={<Dashboard />} /> */}
+
+        {/* New route for Reset Password Page */}
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
       </Routes>
     </div>
   );
