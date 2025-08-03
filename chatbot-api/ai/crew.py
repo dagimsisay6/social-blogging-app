@@ -1,57 +1,165 @@
-from crewai import Agent, LLM
-from crewai_tools import TavilySearchResults
+from crewai import Agent, LLM, Crew, Task
+from crewai_tools import TavilySearchTool
 from dotenv import load_dotenv
+import yaml
+import os
 
-# --- TOOL DEFINITION ---
-# Define any tools your agents will use.
-# For the trend spotter, we only need the search tool.
-# Ensure TAVILY_API_KEY is set in your .env file.
-search_tool = TavilySearchResults()
+# Load environment variables
 load_dotenv()
 
+# --- TOOL DEFINITION ---
+search_tool = TavilySearchTool()
+
+# Configure LLM
 llm = LLM(
-    llm = LLM(
     model="gemini/gemini-2.0-flash",
     temperature=0.7,
 )
-)
-# --- AGENT DEFINITIONS ---
-# Define each of your agents below.
 
+# Load configuration files
+def load_config():
+    config_dir = os.path.join(os.path.dirname(__file__), 'config')
+    
+    with open(os.path.join(config_dir, 'agents.yaml'), 'r') as f:
+        agents_config = yaml.safe_load(f)
+    
+    with open(os.path.join(config_dir, 'tasks.yaml'), 'r') as f:
+        tasks_config = yaml.safe_load(f)
+    
+    return agents_config, tasks_config
+
+# Load configurations
+agents_config, tasks_config = load_config()
+
+# --- AGENT DEFINITIONS ---
 trend_spotter = Agent(
-    # The 'llm' parameter is now configured directly within the agent.
-    # It will automatically use the GOOGLE_API_KEY from your .env file.
-    # The model name 'gemini-1.5-flash' is a fast and powerful modern choice.
     llm=llm,
-    role="Trend Spotter",
-    goal="Identify emerging trends and hot topics for a specific subject.",
-    backstory=(
-        "You are an expert at scouring the internet for the latest news, "
-        "discussions, and articles. You can quickly identify patterns "
-        "and synthesize them into a concise list of trends."
-    ),
+    role=agents_config['trend_spotter']['role'],
+    goal=agents_config['trend_spotter']['goal'],
+    backstory=agents_config['trend_spotter']['backstory'],
     tools=[search_tool],
     verbose=True,
     allow_delegation=False
 )
 
-# --- HOW TO REPEAT FOR OTHER AGENTS ---
-# This structure is now your template. To add the 'content_summarizer',
-# you would simply add this code block below:
-#
-# content_summarizer = Agent(
-#     llm="gemini-1.5-flash",
-#     role="Content Summarizer",
-#     goal="Summarize content in a concise and professional way without losing its essence.",
-#     backstory=(
-#         "You are an expert at summarizing content in a concise and professional manner. "
-#         "You can take a large corpus of text and produce a shorter version that "
-#         "captures the main idea."
-#     ),
-#     tools=[],  # This agent requires no external tools.
-#     verbose=True,
-#     allow_delegation=False
-# )
-#
-# You would do the same for the 'post_editor' and 'chat_agent', making sure to
-# pass the correct tools to each (e.g., the custom BlogSearchTool for the chat_agent).
+content_summarizer = Agent(
+    llm=llm,
+    role=agents_config['content_summarizer']['role'],
+    goal=agents_config['content_summarizer']['goal'],
+    backstory=agents_config['content_summarizer']['backstory'],
+    tools=[],
+    verbose=True,
+    allow_delegation=False
+)
+
+post_editor = Agent(
+    llm=llm,
+    role=agents_config['post_editor']['role'],
+    goal=agents_config['post_editor']['goal'],
+    backstory=agents_config['post_editor']['backstory'],
+    tools=[],
+    verbose=True,
+    allow_delegation=False
+)
+
+chat_agent = Agent(
+    llm=llm,
+    role=agents_config['chat_agent']['role'],
+    goal=agents_config['chat_agent']['goal'],
+    backstory=agents_config['chat_agent']['backstory'],
+    tools=[],  # Will add retrieval tool later
+    verbose=True,
+    allow_delegation=False
+)
+
+# --- TASK CREATION FUNCTIONS ---
+def create_trend_discovery_task(topic: str, current_date: str):
+    return Task(
+        description=tasks_config['discover_trends']['description'].format(
+            topic=topic,
+            current_date=current_date
+        ),
+        expected_output=tasks_config['discover_trends']['expected_output'],
+        agent=trend_spotter
+    )
+
+def create_content_summary_task(original_content: str, desired_length: str = "one paragraph"):
+    return Task(
+        description=tasks_config['summarize_content']['description'].format(
+            original_content=original_content,
+            desired_length=desired_length
+        ),
+        expected_output=tasks_config['summarize_content']['expected_output'],
+        agent=content_summarizer
+    )
+
+def create_post_editing_task(draft_content: str, editing_goal: str):
+    return Task(
+        description=tasks_config['edit_post_draft']['description'].format(
+            draft_content=draft_content,
+            editing_goal=editing_goal
+        ),
+        expected_output=tasks_config['edit_post_draft']['expected_output'],
+        agent=post_editor
+    )
+
+def create_blog_generation_task(topic: str, keywords: str, target_audience: str):
+    return Task(
+        description=tasks_config['generate_blog_draft']['description'].format(
+            topic=topic,
+            keywords=keywords,
+            target_audience=target_audience
+        ),
+        expected_output=tasks_config['generate_blog_draft']['expected_output'],
+        agent=post_editor
+    )
+
+def create_chat_task(chat_history: str, retrieved_context: str, user_question: str):
+    return Task(
+        description=tasks_config['answer_from_knowledge_base']['description'].format(
+            chat_history=chat_history,
+            retrieved_context=retrieved_context,
+            user_question=user_question
+        ),
+        expected_output=tasks_config['answer_from_knowledge_base']['expected_output'],
+        agent=chat_agent
+    )
+
+# --- CREW EXECUTION FUNCTIONS ---
+def execute_trend_discovery(topic: str):
+    from datetime import datetime
+    current_date = datetime.now().strftime("%Y-%m-%d")
+    
+    task = create_trend_discovery_task(topic, current_date)
+    crew = Crew(agents=[trend_spotter], tasks=[task])
+    
+    result = crew.kickoff()
+    return result
+
+def execute_content_summary(content: str, length: str = "one paragraph"):
+    task = create_content_summary_task(content, length)
+    crew = Crew(agents=[content_summarizer], tasks=[task])
+    
+    result = crew.kickoff()
+    return result
+
+def execute_post_editing(draft: str, goal: str):
+    task = create_post_editing_task(draft, goal)
+    crew = Crew(agents=[post_editor], tasks=[task])
+    
+    result = crew.kickoff()
+    return result
+
+def execute_blog_generation(topic: str, keywords: str, audience: str):
+    task = create_blog_generation_task(topic, keywords, audience)
+    crew = Crew(agents=[post_editor], tasks=[task])
+    
+    result = crew.kickoff()
+    return result
+
+def execute_chat_response(chat_history: str, retrieved_context: str, user_question: str):
+    task = create_chat_task(chat_history, retrieved_context, user_question)
+    crew = Crew(agents=[chat_agent], tasks=[task])
+    
+    result = crew.kickoff()
+    return result
