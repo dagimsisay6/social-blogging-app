@@ -1,13 +1,15 @@
+// loginPage.jsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+// Import useAuth hook from your AuthContext
+import { useAuth } from "../context/AuthContext"; // Adjust path as necessary
 // Using inline SVGs for icons to avoid needing an external library
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 
 const LoginPage = () => {
   const navigate = useNavigate();
-
-  // The base URL for your backend API
-  const API_URL = "http://localhost:5001/api/auth";
+  // Destructure the login function from useAuth
+  const { login } = useAuth();
 
   // State to manage form data, updated to use 'email' to match the backend
   const [formData, setFormData] = useState({
@@ -49,49 +51,32 @@ const LoginPage = () => {
 
     if (validateForm()) {
       try {
-        const response = await fetch(`${API_URL}/login`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          // Send only the data the backend expects: email and password
-          body: JSON.stringify({
-            email: formData.email,
-            password: formData.password,
-          }),
-        });
+        // Use the login function from AuthContext instead of direct fetch
+        const result = await login(formData.email, formData.password); // <--- CHANGE THIS LINE
 
-        const data = await response.json();
-
-        if (response.ok) {
-          // Handle successful login
-          console.log("Login successful:", data);
-          // Store the JWT token from the backend in localStorage
-          localStorage.setItem("token", data.token);
+        if (result.success) {
+          // Check the success property from the result
           setMessage("Login successful! Redirecting to dashboard...");
+          console.log("Login successful:", result.message); // Log the success message
+          // The AuthContext's login already handles setting the token and isAuthenticated state
+          // No need to manually set localStorage.setItem("token", data.token); here anymore.
 
-          // Redirect to dashboard after a delay
           setTimeout(() => {
             navigate("/dashboard");
           }, 2000);
         } else {
-          // Handle server-side validation or other errors
-          console.error("Login failed:", data.msg);
-          setMessage(`Error: ${data.msg || "An error occurred."}`);
+          console.error("Login failed:", result.message); // Log the error message
+          setMessage(`Error: ${result.message}`);
         }
       } catch (error) {
-        console.error("Network error:", error);
-        setMessage("Network error. Please try again later.");
+        console.error("Unexpected error during login:", error);
+        setMessage("An unexpected error occurred. Please try again.");
       }
     }
     setLoading(false);
   };
 
-  const handleGoogleLogin = () => {
-    console.log("Google login clicked");
-    // TODO: Implement Google OAuth flow
-  };
-
+  // ... (rest of the component remains the same)
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 p-6">
       <div className="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-lg">
@@ -248,7 +233,7 @@ const LoginPage = () => {
         </div>
 
         {/* Google Login Button */}
-        <button
+        {/* <button
           onClick={handleGoogleLogin}
           className="w-full flex items-center justify-center py-3 border-2 border-gray-300 text-gray-700 font-semibold rounded-xl shadow-sm hover:bg-gray-100 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50"
         >
@@ -258,7 +243,7 @@ const LoginPage = () => {
             className="h-5 w-5 mr-2"
           />
           Log In with your Google account
-        </button>
+        </button> */}
 
         {/* Sign Up Link */}
         <div className="text-center mt-6">
