@@ -1,8 +1,9 @@
 import React from "react";
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route } from "react-router-dom";
 import WelcomePage from "./pages/welcomePage";
-import SignUpPage from './pages/signupPage';
-import LoginPage from './pages/loginPage';
+import SignUpPage from "./pages/signupPage";
+import LoginPage from "./pages/loginPage";
+import Dashboard from "./components/dashboard";
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
 
         {/* You can add more routes here as needed */}
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/dashboard" element={<Dashboard />} />
         {/* <Route path="/dashboard" element={<Dashboard />} /> */}
       </Routes>
     </div>
