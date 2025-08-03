@@ -10,7 +10,16 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5001;
 
-app.use(cors());
+// Updated CORS configuration
+app.use(cors({
+  origin: [
+    'http://localhost:3000',
+    'http://localhost:5173',
+    "https://earnest-praline-32ed1e.netlify.app/"
+  ],
+  credentials: true
+}));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -21,5 +30,5 @@ app.use("/api/auth", authRoutes);
 app.use("/api/posts", postRoutes);
 
 connectDB().then(() => {
-  app.listen(PORT, () => console.log(`Server started on PORT:${PORT}`));
+  app.listen(PORT, '0.0.0.0', () => console.log(`Server started on PORT:${PORT}`));
 });
