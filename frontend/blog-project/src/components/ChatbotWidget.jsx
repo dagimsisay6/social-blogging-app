@@ -6,7 +6,7 @@ import thinkingDots from "../assets/loading.png";
 
 // --- CONFIGURATION ---
 // This should point to YOUR single, smart AI backend endpoint.
-const AI_API_URL = "http://localhost:8000/api/v1/invoke"; // Example: Use your actual Render/Railway URL
+const AI_API_URL = "https://social-blog-ai.onrender.com/api/v1/invoke"; // Example: Use your actual Render/Railway URL
 
 const ChatMessage = memo(({ message }) => {
   const isUser = message.sender === "user";
