@@ -1,0 +1,67 @@
+1. AI Backend: Environment and LLM Configuration
+Description:
+Set up the foundational environment for the AI backend. This includes initializing the Python project with FastAPI, configuring the selected LLM API (Gemini or Groq), and establishing the initial project structure.
+Checklist:
+Initialize FastAPI project with a virtual environment.
+Install and manage dependencies using a requirements.txt file.
+Securely configure LLM API keys using environment variables.
+Create a basic "hello world" endpoint to verify the server is running.
+Set up the initial Git feature branch (feature/ai-backend).
+
+
+2. AI Core: Multi-Agent System Design (crewAI)
+Description:
+Design and implement the core multi-agent system using the crewAI framework. Define the roles, goals, and collaborative tasks for each AI agent required for the social blogging app's features.
+Checklist:
+Define Agent #1: TrendSpotterAgent for discovering new topics.
+Define Agent #2: ContentSummarizerAgent for summarizing blog posts.
+Define Agent #3: PostEditorAgent for refining tone and clarity.
+Define Agent #4: ScopedChatAgent for handling user queries within context.
+Structure the agents and tasks into a cohesive Crew.
+
+
+3. AI Context: Retrieval-Augmented Generation (RAG) Implementation
+Description:
+Build the Retrieval-Augmented Generation system to ensure AI responses are contextually aware and limited to the blog's content. This involves setting up a vector store and creating the data ingestion and retrieval logic.
+Checklist:
+Select and integrate a vector store library (e.g., ChromaDB, FAISS).
+Develop a script to process, chunk, and embed blog content into the vector store.
+Create a tool for the ScopedChatAgent to query the vector store.
+Implement logic to pass retrieved context to the LLM with the user's prompt.
+Test retrieval accuracy with sample queries.
+
+
+4. Integration: API Endpoint Development & Documentation
+Description:
+Develop and document all necessary API endpoints to expose the AI functionalities to the frontend. Ensure endpoints are robust, well-defined, and have proper CORS policies for secure communication.
+Checklist:
+Create POST /api/ai/chat endpoint for interactive conversations.
+Create POST /api/ai/summarize endpoint for content summarization.
+Create POST /api/ai/get-trends endpoint for fetching trending topics.
+Implement Pydantic models for request/response validation.
+Configure CORS middleware to allow requests from the frontend's domain.
+Generate and share API documentation with the full-stack team.
+
+
+5. Deployment: Dockerization and Cloud Hosting
+Description:
+Containerize the AI backend using Docker and deploy it to a cloud platform like Render or Railway. Ensure the deployed service is stable and production-ready.
+Checklist:
+Write a complete and optimized Dockerfile.
+Add a .dockerignore file to minimize the image size.
+Build the Docker image and test it locally.
+Set up a new service on Render/Railway linked to the GitHub repository.
+Configure the deployment to use the Dockerfile.
+Set up production environment variables in the cloud dashboard.
+
+
+6. Testing: End-to-End Integration and Refinement
+Description:
+Collaborate with the frontend team to integrate and test the AI system within the live application. Monitor performance, test all user flows, and refine AI prompts and logic based on real-world results.
+Checklist:
+Perform integration testing for the ChatbotWidget with the chat endpoint.
+Verify that all AI-powered features (summarization, editing, trends) work from the UI.
+Test the "out-of-scope" refusal mechanism.
+Review the quality and accuracy of AI responses.
+Monitor logs on the deployed service for any runtime errors.
+Make at least one round of revisions to the AI prompts or logic based on test feedback.

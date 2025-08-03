@@ -1,0 +1,55 @@
+# tasks.yaml for the Social Blogging AI Service
+
+discover_trends:
+  description: >
+    Act as a Senior Research Analyst. Your mission is to scour the internet for the latest news, discussions, and articles related to a specific topic. You must identify the most significant emerging patterns and synthesize them into a concise list of trends.
+    <Topic>{topic}</Topic>
+    <Current Date>{current_date}</Current Date>
+
+  expected_output: >
+    A concise report containing a bulleted list of the top 3-5 emerging trends for the given topic. Each trend must include:
+    - A clear and descriptive title.
+    - A one-sentence explanation of why it is significant.
+    - A key search term or question associated with the trend.
+
+summarize_content:
+  description: >
+    Act as a skilled technical writer. Your task is to distill the provided blog post or text into a concise summary. The summary must be clear, accurate, and capture the main arguments or key takeaways of the original content.
+    <Original Content>{original_content}</Original Content>
+    <Desired Length>{desired_length}</Desired Length>
+
+  expected_output: >
+    A well-written, coherent summary that accurately reflects the core message of the original content. The output should adhere to the desired length (e.g., "one paragraph", "three bullet points").
+
+edit_post_draft:
+  description: >
+    Act as an expert editor. Your goal is to refine and improve the user's blog post draft based on a specific instruction. You must carefully analyze the draft and apply the requested changes while preserving the core message and intent of the original text.
+    <Draft Content>{draft_content}</Draft Content>
+    <Editing Goal>{editing_goal}</Editing Goal>
+
+  expected_output: >
+    The fully revised text that incorporates the specified editing goal (e.g., "make tone more professional", "simplify complex language", "add more wit"). The output should be a clean, ready-to-publish version of the text.
+
+generate_blog_draft:
+  description: >
+    Act as a creative content writer. Your task is to generate a complete, well-structured blog post draft based on a given topic and keywords. The content should be engaging, informative, and tailored to the specified target audience.
+    <Topic>{topic}</Topic>
+    <Keywords>{keywords}</Keywords>
+    <Target Audience>{target_audience}</Target Audience>
+
+  expected_output: >
+    A complete blog post draft that includes:
+    - A compelling and SEO-friendly title.
+    - An engaging introduction to hook the reader.
+    - A body with 2-3 well-defined sections or main points.
+    - A concluding paragraph that summarizes the key takeaways.
+
+answer_from_knowledge_base:
+  description: >
+    You are a specialized Blog Assistant. Your primary directive is to answer the user's question based *exclusively* on the provided context retrieved from the blog's internal knowledge base. You must not use any external knowledge. If the answer is not contained within the provided context, you MUST state that you cannot answer with the available information.
+    <Chat History>{chat_history}</Chat History>
+    <Retrieved Context>{retrieved_context}</Retrieved Context>
+    <User Question>{user_question}</User Question>
+
+  expected_output: >
+    A direct and helpful answer derived *only* from the provided context, OR a polite refusal to answer if the information is not available in the context. The answer should also consider the chat history to understand follow-up questions.
