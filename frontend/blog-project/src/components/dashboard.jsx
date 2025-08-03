@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { UserRound, ThumbsUp } from "lucide-react";
 
 const Dashboard = () => {
   const { user, token, loading } = useAuth();
@@ -9,11 +10,8 @@ const Dashboard = () => {
   const [loadingPosts, setLoadingPosts] = useState(true);
   const navigate = useNavigate();
 
-  // Define your server's base URL here, just like in Navbar
   const serverUrl = "http://localhost:5001";
-  const defaultPlaceholder = "https://via.placeholder.com/100";
 
-  // Fetch the user's posts
   const fetchUserPosts = async () => {
     if (!token) return;
     try {
@@ -32,7 +30,6 @@ const Dashboard = () => {
     fetchUserPosts();
   }, [token]);
 
-  // Handle like toggle
   const handleLike = async (id, e) => {
     e.stopPropagation();
     try {
@@ -41,9 +38,7 @@ const Dashboard = () => {
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
-
       const { likesCount } = res.data;
-
       setPosts((prev) =>
         prev.map((p) =>
           p._id === id ? { ...p, likes: new Array(likesCount).fill("x") } : p
@@ -55,103 +50,96 @@ const Dashboard = () => {
   };
 
   if (loading) {
-    return <div className="p-6 text-center">Loading your dashboard...</div>;
+    return <div className="p-6 text-center text-gray-600 dark:text-gray-400">Loading your dashboard...</div>;
   }
 
   if (!user) {
-    return <div className="p-6 text-center">No user data available</div>;
+    return <div className="p-6 text-center text-red-500">No user data available. Please log in.</div>;
   }
 
   return (
-    <div className="dashboard-container">
-      <header className="dashboard-header">
-        <div className="flex justify-between items-center p-4 bg-white shadow-sm">
-          <div className="flex items-center">
-            <span className="text-xl font-semibold">
-              {user.firstName}'s Dashboard
-            </span>
-          </div>
-        </div>
-      </header>
-
-      <main className="dashboard-content p-4 max-w-7xl mx-auto">
-        {/* User Profile Section */}
-        <section className="user-profile bg-white p-6 rounded-lg shadow-md mb-6 flex items-center">
+    <div className="p-4 max-w-7xl mx-auto dark:bg-gray-900 min-h-screen text-gray-900 dark:text-white">
+      <section className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md mb-8 flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left">
+        {user.profilePicture ? (
           <img
-            src={
-              // <<<--- FIXED LINE 1: Prepend serverUrl to the user's profile picture
-              user.profilePicture
-                ? `${serverUrl}${user.profilePicture}`
-                : defaultPlaceholder
-            }
+            src={`${serverUrl}${user.profilePicture}`}
             alt={`${user.firstName} ${user.lastName}`}
-            className="w-24 h-24 rounded-full object-cover mr-6 border-4 border-blue-500"
+            className="w-24 h-24 rounded-full object-cover mr-0 sm:mr-6 mb-4 sm:mb-0 border-4 border-blue-500"
           />
+        ) : (
+          // Ensured explicit text color and padding for visibility
+          <UserRound
+            className="w-24 h-24 rounded-full mr-0 sm:mr-6 mb-4 sm:mb-0 border-4 border-blue-500 bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 p-2"
+            size={96}
+          />
+        )}
 
-          <div>
-            <h2 className="text-3xl font-bold text-gray-800">
-              {user.firstName} {user.lastName}
-            </h2>
-            <p className="text-gray-600">{user.email}</p>
-          </div>
-        </section>
+        <div>
+          <h2 className="text-3xl font-bold text-gray-800 dark:text-white">
+            {user.firstName} {user.lastName}
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400">{user.email}</p>
+        </div>
+      </section>
 
-        <nav className="flex justify-around border-b border-gray-300 mb-6">
-          <button className="py-3 px-6 border-b-2 border-blue-600 text-blue-600 font-semibold">
-            Posts
-          </button>
-        </nav>
+      <h3 className="text-2xl font-bold mb-6 border-b-2 border-blue-500 pb-2">
+        My Posts
+      </h3>
 
-        {/* User Posts Grid */}
-        <section>
-          {loadingPosts ? (
-            <p className="text-center text-gray-600">Loading your posts...</p>
-          ) : posts.length === 0 ? (
-            <p className="text-center text-gray-600">
-              You haven't created any posts yet.
-            </p>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {posts.map((post) => (
-                <div
-                  key={post._id}
-                  className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden cursor-pointer hover:shadow-lg transition"
-                  onClick={() => navigate(`/posts/${post._id}`)}
-                >
-                  {post.images?.length > 0 && (
+      <section>
+        {loadingPosts ? (
+          <p className="text-center text-gray-600 dark:text-gray-400">Loading your posts...</p>
+        ) : posts.length === 0 ? (
+          <p className="text-center text-gray-600 dark:text-gray-400">
+            You haven't created any posts yet.
+          </p>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {posts.map((post) => (
+              <div
+                key={post._id}
+                className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden group cursor-pointer hover:shadow-lg transition-all duration-300"
+                onClick={() => navigate(`/posts/${post._id}`)}
+              >
+                {post.images?.length > 0 && (
+                  <div className="relative overflow-hidden">
                     <img
-                      // <<<--- FIXED LINE 2: Prepend serverUrl to the post image
                       src={`${serverUrl}${post.images[0]}`}
                       alt={post.title}
-                      className="w-full h-40 object-cover"
+                      className="w-full h-40 object-cover transition-transform duration-300 group-hover:scale-105"
                     />
-                  )}
+                    <div className="absolute inset-0 bg-black bg-opacity-10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                  </div>
+                )}
 
-                  <div className="p-4">
+                <div className="p-4 flex flex-col justify-between h-auto">
+                  <div>
                     <h2 className="text-lg font-semibold text-gray-900 dark:text-white truncate">
                       {post.title}
                     </h2>
                     <p className="text-gray-700 dark:text-gray-300 mt-1 line-clamp-2">
                       {post.content}
                     </p>
-                    <div className="flex justify-between items-center mt-3">
-                      <button
-                        onClick={(e) => handleLike(post._id, e)}
-                        className="text-blue-500 hover:text-blue-700"
-                      >
-                        👍 {post.likes?.length || 0}
-                      </button>
-                      <span className="text-gray-400 text-sm">
-                        {new Date(post.createdAt).toLocaleDateString()}
-                      </span>
-                    </div>
+                  </div>
+
+                  <div className="flex justify-between items-center mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+                    <button
+                      onClick={(e) => handleLike(post._id, e)}
+                      className="flex items-center space-x-1 text-blue-500 hover:text-blue-700 transition"
+                    >
+                      <ThumbsUp size={18} />
+                      <span className="text-sm">{post.likes?.length || 0}</span>
+                    </button>
+                    <span className="text-gray-400 text-sm">
+                      {new Date(post.createdAt).toLocaleDateString()}
+                    </span>
                   </div>
                 </div>
-              ))}
-            </div>
-          )}
-        </section>
-      </main>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
     </div>
   );
 };

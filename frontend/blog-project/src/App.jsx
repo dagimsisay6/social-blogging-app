@@ -23,6 +23,9 @@ import MyPosts from "./pages/MyPosts.jsx";
 import PostDetails from "./pages/PostDetails.jsx";
 import EditPost from "./pages/EditPost.jsx";
 import ChatbotWidget from "./components/ChatbotWidget.jsx"
+// IMPORT AllPosts component
+import AllPosts from "./pages/AllPosts.jsx";
+
 
 // --- ProtectedRoute Component ---
 const ProtectedRoute = ({ children }) => {
@@ -49,7 +52,10 @@ function App() {
     <Router>
       <AuthProvider>
         <SidebarProvider>
+          {/* Fixed Navbar */}
           <Navbar />
+
+          {/* Main Container - positioned below the fixed navbar */}
           <div className="flex h-[calc(100vh-64px)] overflow-hidden">
             <Sidebar />
             <main className="flex-1 overflow-y-auto p-4 lg:ml-64 transition-all duration-300 ease-in-out">
@@ -59,6 +65,8 @@ function App() {
                 <Route path="/signup" element={<SignUpPage />} />
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/reset-password" element={<ResetPasswordPage />} />
+                {/* NEW ROUTE: Add the AllPosts component */}
+                <Route path="/posts" element={<AllPosts />} />
 
                 {/* --- Protected Routes --- */}
                 <Route

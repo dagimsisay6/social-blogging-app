@@ -1,9 +1,25 @@
+// src/routes/postRoutes.js
 import express from "express";
 import { protect } from "../middleware/auth.js";
 import Post from "../models/Post.js";
 import upload from "../middleware/upload.js";
 
 const router = express.Router();
+
+// =========================
+// GET All Posts (Public) - New route added
+// =========================
+router.get("/", async (req, res) => {
+  try {
+    const posts = await Post.find({})
+      .populate("author", "firstName lastName profilePicture") // Populate author details
+      .sort({ createdAt: -1 }); // Sort by newest first
+    res.json(posts);
+  } catch (error) {
+    console.error("Error fetching all posts:", error);
+    res.status(500).json({ message: "Server error fetching posts" });
+  }
+});
 
 // =========================
 // CREATE POST (with multiple images)
