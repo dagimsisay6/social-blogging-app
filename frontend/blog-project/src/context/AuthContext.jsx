@@ -7,7 +7,7 @@ import React, {
 } from "react";
 import axios from "axios";
 
-axios.defaults.baseURL = "http://localhost:5001";
+axios.defaults.baseURL = "https://social-blogging-app-1-5k7h.onrender.com";
 
 const AuthContext = createContext(null);
 
@@ -22,7 +22,7 @@ export const AuthProvider = ({ children }) => {
       axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
       try {
         const res = await axios.get("/api/auth/profile");
-        console.log("loadUser fetched profile:", res.data); // DEBUG log
+        console.log("loadUser fetched profile:", res.data);
 
         // Append timestamp to bust cache for profile picture
         if (res.data.profilePicture) {

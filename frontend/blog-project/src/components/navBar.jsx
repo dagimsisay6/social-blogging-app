@@ -17,7 +17,7 @@ const Navbar = () => {
   const [showPictureUploader, setShowPictureUploader] = useState(false);
   const dropdownRef = useRef(null);
 
-  const serverUrl = "http://localhost:5001";
+  const serverUrl = "https://social-blogging-app-1-5k7h.onrender.com";
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", isDarkMode);
@@ -40,11 +40,18 @@ const Navbar = () => {
 
   return (
     <>
-      <nav className="bg-white dark:bg-gray-800 shadow-md p-4 flex justify-between items-center relative z-10">
+      <nav
+        className="
+          bg-white dark:bg-gray-800 shadow-md p-4 flex justify-between items-center
+          fixed top-0 z-10 transition-all duration-300
+          w-full lg:w-[calc(100%-5rem)]  
+          lg:left-[5rem]                 
+        "
+      >
         <div className="flex items-center">
           <button
             onClick={toggleSidebar}
-            className="lg:hidden text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-md p-1 mr-4"
+            className="lg:hidden text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-md p-1 mr-3"
             aria-label="Toggle sidebar"
           >
             <Menu className="h-7 w-7" />
@@ -64,7 +71,11 @@ const Navbar = () => {
             className="p-2 rounded-full text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
             aria-label="Toggle dark mode"
           >
-            {isDarkMode ? <Sun className="w-6 h-6" /> : <Moon className="w-6 h-6" />}
+            {isDarkMode ? (
+              <Sun className="w-6 h-6" />
+            ) : (
+              <Moon className="w-6 h-6" />
+            )}
           </button>
 
           {isAuthenticated ? (
@@ -80,7 +91,6 @@ const Navbar = () => {
                     className="h-8 w-8 rounded-full object-cover border border-gray-300 dark:border-gray-600"
                   />
                 ) : (
-                  // Ensured explicit text color and padding for visibility
                   <UserRound
                     className="h-8 w-8 rounded-full border border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 p-1"
                     size={28}

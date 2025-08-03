@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import ConfirmationModal from "../components/ConfirmationModal";
 import { Trash2, Pencil, ThumbsUp } from "lucide-react";
+
 const MyPosts = () => {
   const [posts, setPosts] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -11,7 +12,10 @@ const MyPosts = () => {
   const { token } = useAuth();
   const navigate = useNavigate();
 
-  const serverUrl = "http://localhost:5001";
+  const serverUrl = "https://social-blogging-app-1-5k7h.onrender.com";
+
+  const NAVBAR_HEIGHT = 70;
+  const SIDEBAR_WIDTH = 100;
 
   const fetchMyPosts = async () => {
     try {
@@ -45,7 +49,6 @@ const MyPosts = () => {
       setPostToDeleteId(null);
     } catch (err) {
       console.error("Error deleting post", err);
-      // Optional: Add a toast notification here
       setIsModalOpen(false);
       setPostToDeleteId(null);
     }
@@ -71,9 +74,9 @@ const MyPosts = () => {
         prev.map((p) =>
           p._id === id
             ? {
-                ...p,
-                likes: new Array(likesCount).fill("dummy"),
-              }
+              ...p,
+              likes: new Array(likesCount).fill("dummy"),
+            }
             : p
         )
       );
@@ -83,7 +86,14 @@ const MyPosts = () => {
   };
 
   return (
-    <div className="p-4 max-w-6xl mx-auto dark:bg-gray-900 min-h-screen">
+    <div
+      style={{
+        marginTop: NAVBAR_HEIGHT,
+        marginRight: SIDEBAR_WIDTH,
+        minHeight: `calc(100vh - ${NAVBAR_HEIGHT}px)`,
+      }}
+      className="dark:bg-gray-900 text-gray-900 dark:text-white p-4 max-w-6xl mx-auto"
+    >
       <h1 className="text-3xl font-bold mb-8 text-gray-900 dark:text-white">
         My Posts
       </h1>
