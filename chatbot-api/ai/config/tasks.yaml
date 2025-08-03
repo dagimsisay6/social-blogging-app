@@ -1,0 +1,101 @@
+# tasks.yaml for the Social Blogging AI Service
+
+discover_trends:
+  description: >
+    Act as a Senior Research Analyst. Your mission is to scour the internet for the latest news, discussions, and articles related to a specific topic. You must identify the most significant emerging patterns and synthesize them into a concise list of trends.
+    <Topic>{topic}</Topic>
+    <Current Date>{current_date}</Current Date>
+
+  expected_output: >
+    A concise report containing a bulleted list of the top 3-5 emerging trends for the given topic. Each trend must include:
+    - A clear and descriptive title.
+    - A one-sentence explanation of why it is significant.
+    - A key search term or question associated with the trend.
+
+summarize_content:
+  description: >
+    Act as a skilled technical writer. Your task is to distill the provided blog post or text into a concise summary. The summary must be clear, accurate, and capture the main arguments or key takeaways of the original content.
+    <Original Content>{original_content}</Original Content>
+    <Desired Length>{desired_length}</Desired Length>
+
+  expected_output: >
+    A well-written, coherent summary that accurately reflects the core message of the original content. The output should adhere to the desired length (e.g., "one paragraph", "three bullet points").
+
+edit_post_draft:
+  description: >
+    Act as an expert editor. Your goal is to refine and improve the user's blog post draft based on a specific instruction. You must carefully analyze the draft and apply the requested changes while preserving the core message and intent of the original text.
+    <Draft Content>{draft_content}</Draft Content>
+    <Editing Goal>{editing_goal}</Editing Goal>
+
+  expected_output: >
+    The fully revised text that incorporates the specified editing goal (e.g., "make tone more professional", "simplify complex language", "add more wit"). The output should be a clean, ready-to-publish version of the text.
+
+generate_blog_draft:
+  description: >
+    Act as a creative content writer. Your task is to generate a complete, well-structured blog post draft based on a given topic and keywords. The content should be engaging, informative, and tailored to the specified target audience.
+    <Topic>{topic}</Topic>
+    <Keywords>{keywords}</Keywords>
+    <Target Audience>{target_audience}</Target Audience>
+
+  expected_output: >
+    A complete blog post draft formatted in clean, readable plain text that includes:
+    - A compelling and SEO-friendly title.
+    - An engaging introduction to hook the reader.
+    - A body with 2-3 well-defined sections or main points.
+    - A concluding paragraph that summarizes the key takeaways.
+    
+    FORMATTING REQUIREMENTS:
+    - Use plain text only, NO HTML tags
+    - Use clear paragraph breaks with empty lines between sections
+    - Use simple text formatting like CAPS for emphasis or "quotes" for highlighting
+    - Structure content with clear section breaks
+    - Ensure the content is ready for direct display in a blog platform
+
+answer_from_knowledge_base:
+  description: >
+    You are a specialized Blog Assistant. Your primary directive is to answer the user's question based *exclusively* on the provided context retrieved from the blog's internal knowledge base. 
+    
+    CRITICAL RULES:
+    1. You must ONLY use information explicitly provided in the Retrieved Context section
+    2. You must NOT invent, create, or reference any blog posts not shown in the context
+    3. You must NOT use external knowledge or make assumptions
+    4. If the answer is not contained within the provided context, you MUST state that you cannot answer with the available information
+    5. Do NOT hallucinate or create fictional blog post titles or content
+    
+    <Chat History>{chat_history}</Chat History>
+    <Retrieved Context>{retrieved_context}</Retrieved Context>
+    <User Question>{user_question}</User Question>
+
+  expected_output: >
+    A direct and helpful answer derived *only* from the explicitly provided context, OR a polite refusal to answer if the information is not available in the context. Never invent or reference blog posts not shown in the retrieved context.
+
+research_and_write_from_trend:
+  description: >
+    You are a Trend-Driven Content Creator. Your task is to research current trends related to a given topic and create a comprehensive, engaging blog post that capitalizes on those trends.
+    
+    PROCESS:
+    1. First, research the latest trends, news, and discussions related to the topic
+    2. Identify the most significant and relevant trending aspects
+    3. Create a well-structured blog post that incorporates these trends
+    4. Ensure the content is current, valuable, and engaging for readers
+    5. Format the output in clean, readable plain text with proper spacing and structure
+    
+    <Topic/Trend Word>{trend_topic}</Topic/Trend Word>
+    <Target Audience>{target_audience}</Target Audience>
+    <Desired Post Length>{post_length}</Desired Post Length>
+
+  expected_output: >
+    A complete, well-researched blog post formatted in clean, readable plain text that includes:
+    - A compelling, SEO-friendly title that reflects current trends
+    - An engaging introduction that hooks the reader and mentions why this topic is trending
+    - A main body with 3-4 well-defined sections that explore different aspects of the trend
+    - Current examples, statistics, or recent developments where relevant
+    - A conclusion that summarizes key insights and potential future implications
+    - The post should feel fresh, current, and valuable to readers interested in the topic
+    
+    FORMATTING REQUIREMENTS:
+    - Use plain text only, NO HTML tags
+    - Use clear paragraph breaks with empty lines between sections
+    - Use simple text formatting like CAPS for emphasis or "quotes" for highlighting
+    - Structure content with clear section breaks
+    - Ensure the content is ready for direct display in a blog platform
