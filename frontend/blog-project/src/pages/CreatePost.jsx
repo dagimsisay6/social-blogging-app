@@ -3,6 +3,9 @@ import axios from "axios";
 import { useAuth } from "../context/AuthContext.jsx";
 import { useNavigate } from "react-router-dom";
 
+// Use the server URL from environment variables, defaulting to localhost
+const serverUrl = import.meta.env.API_URL || "http://localhost:5001";
+
 const CreatePost = () => {
   const { isAuthenticated } = useAuth();
   const token = localStorage.getItem("token");
@@ -33,7 +36,8 @@ const CreatePost = () => {
 
       imageFiles.forEach((file) => formDataObj.append("images", file));
 
-      await axios.post("http://localhost:5001/api/posts", formDataObj, {
+      // Use the serverUrl variable here
+      await axios.post(`${serverUrl}/api/posts`, formDataObj, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data",

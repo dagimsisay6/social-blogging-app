@@ -11,7 +11,7 @@ const MyPosts = () => {
   const { token } = useAuth();
   const navigate = useNavigate();
 
-  const serverUrl = "http://localhost:5001";
+  const serverUrl = import.meta.env.API_URL || "http://localhost:5001";
 
   const fetchMyPosts = async () => {
     try {
@@ -71,9 +71,9 @@ const MyPosts = () => {
         prev.map((p) =>
           p._id === id
             ? {
-                ...p,
-                likes: new Array(likesCount).fill("dummy"),
-              }
+              ...p,
+              likes: new Array(likesCount).fill("dummy"),
+            }
             : p
         )
       );

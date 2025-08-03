@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+// Use the server URL from environment variables, defaulting to localhost
+const serverUrl = import.meta.env.API_URL || "http://localhost:5001";
+
 const SignUpPage = () => {
   const navigate = useNavigate();
-
-  // The base URL for your backend API
-  const API_URL = "http://localhost:5001/api/auth";
 
   // State to manage form data
   const [formData, setFormData] = useState({
@@ -67,7 +67,8 @@ const SignUpPage = () => {
 
     if (validateForm()) {
       try {
-        const response = await fetch(`${API_URL}/signup`, {
+        // Use the dynamic serverUrl for the API call
+        const response = await fetch(`${serverUrl}/api/auth/signup`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -150,9 +151,8 @@ const SignUpPage = () => {
               value={formData.firstName}
               onChange={handleChange}
               placeholder="John"
-              className={`w-full p-3 rounded-lg border-2 ${
-                errors.firstName ? "border-red-500" : "border-gray-300"
-              } focus:outline-none focus:border-blue-500 transition-colors`}
+              className={`w-full p-3 rounded-lg border-2 ${errors.firstName ? "border-red-500" : "border-gray-300"
+                } focus:outline-none focus:border-blue-500 transition-colors`}
             />
             {errors.firstName && (
               <p className="text-red-500 text-sm mt-1">{errors.firstName}</p>
@@ -170,9 +170,8 @@ const SignUpPage = () => {
               value={formData.lastName}
               onChange={handleChange}
               placeholder="Doe"
-              className={`w-full p-3 rounded-lg border-2 ${
-                errors.lastName ? "border-red-500" : "border-gray-300"
-              } focus:outline-none focus:border-blue-500 transition-colors`}
+              className={`w-full p-3 rounded-lg border-2 ${errors.lastName ? "border-red-500" : "border-gray-300"
+                } focus:outline-none focus:border-blue-500 transition-colors`}
             />
             {errors.lastName && (
               <p className="text-red-500 text-sm mt-1">{errors.lastName}</p>
@@ -190,9 +189,8 @@ const SignUpPage = () => {
               value={formData.email}
               onChange={handleChange}
               placeholder="johndoe@gmail.com"
-              className={`w-full p-3 rounded-lg border-2 ${
-                errors.email ? "border-red-500" : "border-gray-300"
-              } focus:outline-none focus:border-blue-500 transition-colors`}
+              className={`w-full p-3 rounded-lg border-2 ${errors.email ? "border-red-500" : "border-gray-300"
+                } focus:outline-none focus:border-blue-500 transition-colors`}
             />
             {errors.email && (
               <p className="text-red-500 text-sm mt-1">{errors.email}</p>
@@ -211,9 +209,8 @@ const SignUpPage = () => {
                 value={formData.password}
                 onChange={handleChange}
                 placeholder="Password"
-                className={`w-full p-3 rounded-lg border-2 ${
-                  errors.password ? "border-red-500" : "border-gray-300"
-                } focus:outline-none focus:border-blue-500 transition-colors`}
+                className={`w-full p-3 rounded-lg border-2 ${errors.password ? "border-red-500" : "border-gray-300"
+                  } focus:outline-none focus:border-blue-500 transition-colors`}
               />
               <button
                 type="button"
@@ -269,9 +266,8 @@ const SignUpPage = () => {
                 value={formData.confirmPassword}
                 onChange={handleChange}
                 placeholder="Password"
-                className={`w-full p-3 rounded-lg border-2 ${
-                  errors.confirmPassword ? "border-red-500" : "border-gray-300"
-                } focus:outline-none focus:border-blue-500 transition-colors`}
+                className={`w-full p-3 rounded-lg border-2 ${errors.confirmPassword ? "border-red-500" : "border-gray-300"
+                  } focus:outline-none focus:border-blue-500 transition-colors`}
               />
               <button
                 type="button"

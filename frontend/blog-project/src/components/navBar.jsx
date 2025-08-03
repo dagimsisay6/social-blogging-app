@@ -17,8 +17,7 @@ const Navbar = () => {
   const [showPictureUploader, setShowPictureUploader] = useState(false);
   const dropdownRef = useRef(null);
 
-  const serverUrl = "http://localhost:5001";
-
+  const serverUrl = import.meta.env.API_URL || "http://localhost:5001";
   useEffect(() => {
     document.documentElement.classList.toggle("dark", isDarkMode);
     localStorage.setItem("theme", isDarkMode ? "dark" : "light");

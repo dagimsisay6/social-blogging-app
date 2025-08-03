@@ -10,8 +10,7 @@ const Dashboard = () => {
   const [loadingPosts, setLoadingPosts] = useState(true);
   const navigate = useNavigate();
 
-  const serverUrl = "http://localhost:5001";
-
+  const serverUrl = import.meta.env.API_URL || "http://localhost:5001";
   const fetchUserPosts = async () => {
     if (!token) return;
     try {

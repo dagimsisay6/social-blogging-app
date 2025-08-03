@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+// Use the server URL from environment variables, defaulting to localhost
+const serverUrl = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+
 const ResetPasswordPage = () => {
   const navigate = useNavigate();
-  const API_URL = 'http://localhost:5001/api/auth';
 
   // State to manage the two steps of the form
   const [email, setEmail] = useState('');
@@ -44,8 +46,8 @@ const ResetPasswordPage = () => {
     }
 
     try {
-      // New backend route to simply verify the email exists
-      const response = await fetch(`${API_URL}/verify-email`, {
+      // Use the dynamic serverUrl for the API call
+      const response = await fetch(`${serverUrl}/api/auth/verify-email`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -92,8 +94,8 @@ const ResetPasswordPage = () => {
     }
 
     try {
-      // New backend route to update the password directly
-      const response = await fetch(`${API_URL}/reset-password-unsecured`, {
+      // Use the dynamic serverUrl for the API call
+      const response = await fetch(`${serverUrl}/api/auth/reset-password-unsecured`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

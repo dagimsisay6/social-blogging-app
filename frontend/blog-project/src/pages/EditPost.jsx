@@ -3,6 +3,9 @@ import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useAuth } from "../context/AuthContext";
 
+// Use the server URL from environment variables, defaulting to localhost
+const serverUrl = import.meta.env.API_URL || "http://localhost:5001";
+
 const EditPost = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -15,14 +18,15 @@ const EditPost = () => {
   useEffect(() => {
     const fetchPost = async () => {
       try {
-        const res = await axios.get(`http://localhost:5001/api/posts/${id}`);
+        // Use the serverUrl variable here
+        const res = await axios.get(`${serverUrl}/api/posts/${id}`);
         setFormData({ title: res.data.title, content: res.data.content });
       } catch (err) {
         console.error("Error fetching post:", err);
       }
     };
     fetchPost();
-  }, [id]);
+  }, [id, serverUrl]); // Added serverUrl to the dependency array
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -42,7 +46,8 @@ const EditPost = () => {
       formDataObj.append("content", formData.content);
       imageFiles.forEach((file) => formDataObj.append("images", file));
 
-      await axios.put(`http://localhost:5001/api/posts/${id}`, formDataObj, {
+      // Use the serverUrl variable here
+      await axios.put(`${serverUrl}/api/posts/${id}`, formDataObj, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data",

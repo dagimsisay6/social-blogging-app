@@ -16,8 +16,7 @@ const AllPosts = () => {
   const [limit, setLimit] = useState(10); // Number of posts per page
 
   // The base URL for your backend server.
-  const serverUrl = "http://localhost:5001";
-
+  const serverUrl = import.meta.env.API_URL || "http://localhost:5001";
   useEffect(() => {
     const fetchPosts = async () => {
       setLoading(true);
@@ -161,8 +160,8 @@ const AllPosts = () => {
                   key={index}
                   onClick={() => handlePageChange(index + 1)}
                   className={`px-4 py-2 text-sm font-semibold rounded-lg transition-colors duration-200 ${currentPage === index + 1
-                      ? "bg-blue-600 text-white"
-                      : "bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600"
+                    ? "bg-blue-600 text-white"
+                    : "bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600"
                     }`}
                 >
                   {index + 1}

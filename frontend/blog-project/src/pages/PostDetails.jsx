@@ -3,6 +3,9 @@ import { useParams } from "react-router-dom";
 import axios from "axios";
 import { useAuth } from "../context/AuthContext.jsx";
 
+// Use the server URL from environment variables, defaulting to localhost
+const serverUrl = import.meta.env.API_URL || "http://localhost:5001";
+
 const PostDetails = () => {
   const { id } = useParams();
   const { isAuthenticated, token } = useAuth();
@@ -15,7 +18,7 @@ const PostDetails = () => {
   // Fetch single post
   const fetchPost = async () => {
     try {
-      const res = await axios.get(`http://localhost:5001/api/posts/${id}`);
+      const res = await axios.get(`${serverUrl}/api/posts/${id}`);
       setPost(res.data);
     } catch (err) {
       console.error("Error fetching post:", err);
@@ -29,7 +32,7 @@ const PostDetails = () => {
   const handleLike = async () => {
     try {
       const res = await axios.post(
-        `http://localhost:5001/api/posts/${id}/like`,
+        `${serverUrl}/api/posts/${id}/like`,
         {},
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -53,7 +56,7 @@ const PostDetails = () => {
 
     try {
       const res = await axios.post(
-        `http://localhost:5001/api/posts/${id}/comments`,
+        `${serverUrl}/api/posts/${id}/comments`,
         { text: commentText },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -84,7 +87,7 @@ const PostDetails = () => {
           {post.images.map((img, idx) => (
             <img
               key={idx}
-              src={`http://localhost:5001${img}`}
+              src={`${serverUrl}${img}`}
               alt={post.title}
               className="w-full rounded mb-2"
             />
