@@ -66,6 +66,73 @@ router.get("/my-posts", protect, async (req, res) => {
   }
 });
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+// =========================
+// GET All Posts (Public) with Pagination
+// =========================
+router.get("/", async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const posts = await Post.find({})
+      .populate("author", "firstName lastName profilePicture") // Populate author details
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    const totalPosts = await Post.countDocuments({});
+    const totalPages = Math.ceil(totalPosts / limit);
+
+    res.status(200).json({
+      posts,
+      currentPage: page,
+      totalPages,
+      totalPosts,
+    });
+  } catch (error) {
+    console.error("Error fetching all posts:", error);
+    res.status(500).json({ message: "Server error fetching posts" });
+  }
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // =========================
 // UPDATE Post (Protected)
 // =========================
