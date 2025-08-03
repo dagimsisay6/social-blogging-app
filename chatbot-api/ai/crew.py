@@ -76,6 +76,16 @@ chat_agent = Agent(
     allow_delegation=False
 )
 
+trend_based_writer = Agent(
+    llm=llm,
+    role=agents_config['trend_based_writer']['role'],
+    goal=agents_config['trend_based_writer']['goal'],
+    backstory=agents_config['trend_based_writer']['backstory'],
+    tools=[search_tool],  # Has access to search tool for trend research
+    verbose=True,
+    allow_delegation=False
+)
+
 # --- TASK CREATION FUNCTIONS ---
 def create_trend_discovery_task(topic: str, current_date: str):
     return Task(
@@ -129,6 +139,17 @@ def create_chat_task(chat_history: str, retrieved_context: str, user_question: s
         agent=chat_agent
     )
 
+def create_trend_based_writing_task(trend_topic: str, target_audience: str = "general readers", post_length: str = "medium-length"):
+    return Task(
+        description=tasks_config['research_and_write_from_trend']['description'].format(
+            trend_topic=trend_topic,
+            target_audience=target_audience,
+            post_length=post_length
+        ),
+        expected_output=tasks_config['research_and_write_from_trend']['expected_output'],
+        agent=trend_based_writer
+    )
+
 # --- CREW EXECUTION FUNCTIONS ---
 def execute_trend_discovery(topic: str):
     from datetime import datetime
@@ -164,6 +185,24 @@ def execute_blog_generation(topic: str, keywords: str, audience: str):
 def execute_chat_response(chat_history: str, retrieved_context: str, user_question: str):
     task = create_chat_task(chat_history, retrieved_context, user_question)
     crew = Crew(agents=[chat_agent], tasks=[task])
+    
+    result = crew.kickoff()
+    return result
+
+def execute_trend_based_writing(trend_topic: str, target_audience: str = "general readers", post_length: str = "medium-length"):
+    """
+    Execute trend-based blog post creation.
+    
+    Args:
+        trend_topic: The trending topic or keyword to research and write about
+        target_audience: The intended audience for the blog post
+        post_length: Desired length of the post (short, medium-length, long)
+    
+    Returns:
+        A complete blog post based on current trends
+    """
+    task = create_trend_based_writing_task(trend_topic, target_audience, post_length)
+    crew = Crew(agents=[trend_based_writer], tasks=[task])
     
     result = crew.kickoff()
     return result

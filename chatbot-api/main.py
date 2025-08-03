@@ -12,7 +12,8 @@ from ai.crew import (
     execute_content_summary,
     execute_post_editing,
     execute_blog_generation,
-    execute_chat_response
+    execute_chat_response,
+    execute_trend_based_writing
 )
 from ai.rag_system import get_rag_system
 
@@ -59,6 +60,11 @@ class GenerateBlogRequest(BaseModel):
 class ChatRequest(BaseModel):
     message: str
     chat_history: Optional[str] = ""
+
+class TrendBasedWritingRequest(BaseModel):
+    trend_topic: str
+    target_audience: Optional[str] = "general readers"
+    post_length: Optional[str] = "medium-length"
 
 class BlogPostData(BaseModel):
     post_id: str
@@ -247,6 +253,39 @@ async def chat_with_ai(request: ChatRequest):
         raise HTTPException(
             status_code=500,
             detail=f"Failed to process chat: {str(e)}"
+        )
+
+@app.post("/api/ai/trend-write", response_model=APIResponse)
+async def trend_based_writing(request: TrendBasedWritingRequest):
+    """Research trends and write a blog post based on a trending topic."""
+    try:
+        logger.info(f"Processing trend-based writing for: {request.trend_topic}")
+        
+        # Execute trend-based writing (research + write in one step)
+        result = execute_trend_based_writing(
+            trend_topic=request.trend_topic,
+            target_audience=request.target_audience,
+            post_length=request.post_length
+        )
+        
+        blog_post = str(result)
+        
+        return APIResponse(
+            success=True,
+            data={
+                "blog_post": blog_post,
+                "trend_topic": request.trend_topic,
+                "target_audience": request.target_audience,
+                "post_length": request.post_length
+            },
+            message="Trend-based blog post generated successfully"
+        )
+        
+    except Exception as e:
+        logger.error(f"Error in trend-based writing: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to generate trend-based content: {str(e)}"
         )
 
 # --- BLOG POST MANAGEMENT ENDPOINTS ---

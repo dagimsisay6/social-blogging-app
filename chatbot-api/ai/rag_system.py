@@ -30,19 +30,21 @@ class BlogRAGSystem:
         # Use Google's embedding API
         google_api_key = os.getenv("GOOGLE_API_KEY")
         if not google_api_key:
-            logger.warning("GOOGLE_API_KEY not found, falling back to default embeddings")
+            logger.warning("GOOGLE_API_KEY not found in environment variables")
+            logger.warning("Falling back to default embeddings (this will download a local model)")
             self.embedding_function = embedding_functions.DefaultEmbeddingFunction()
         else:
             try:
+                logger.info(f"Attempting to initialize Google embeddings with API key: {google_api_key[:10]}...")
                 # Use Google's text embedding model via API
                 self.embedding_function = embedding_functions.GoogleGenerativeAiEmbeddingFunction(
                     api_key=google_api_key,
                     model_name="models/text-embedding-004"  # Latest Google embedding model
                 )
-                logger.info("Using Google Generative AI embeddings (text-embedding-004)")
+                logger.info("Successfully initialized Google Generative AI embeddings (text-embedding-004)")
             except Exception as e:
                 logger.error(f"Failed to initialize Google embeddings: {e}")
-                logger.info("Falling back to default embeddings")
+                logger.warning("Falling back to default embeddings (this will download a local model)")
                 self.embedding_function = embedding_functions.DefaultEmbeddingFunction()
         
         # Get or create collection
@@ -262,9 +264,12 @@ class BlogRAGSystem:
             logger.error(f"Error getting context for chat: {str(e)}")
             return "Error retrieving relevant blog content."
 
-# Initialize global RAG system instance
-rag_system = BlogRAGSystem()
+# Global RAG system instance (lazy initialization)
+_rag_system = None
 
 def get_rag_system() -> BlogRAGSystem:
-    """Get the global RAG system instance."""
-    return rag_system
+    """Get the global RAG system instance with lazy initialization."""
+    global _rag_system
+    if _rag_system is None:
+        _rag_system = BlogRAGSystem()
+    return _rag_system

@@ -38,11 +38,18 @@ generate_blog_draft:
     <Target Audience>{target_audience}</Target Audience>
 
   expected_output: >
-    A complete blog post draft that includes:
+    A complete blog post draft formatted in clean, readable plain text that includes:
     - A compelling and SEO-friendly title.
     - An engaging introduction to hook the reader.
     - A body with 2-3 well-defined sections or main points.
     - A concluding paragraph that summarizes the key takeaways.
+    
+    FORMATTING REQUIREMENTS:
+    - Use plain text only, NO HTML tags
+    - Use clear paragraph breaks with empty lines between sections
+    - Use simple text formatting like CAPS for emphasis or "quotes" for highlighting
+    - Structure content with clear section breaks
+    - Ensure the content is ready for direct display in a blog platform
 
 answer_from_knowledge_base:
   description: >
@@ -61,3 +68,34 @@ answer_from_knowledge_base:
 
   expected_output: >
     A direct and helpful answer derived *only* from the explicitly provided context, OR a polite refusal to answer if the information is not available in the context. Never invent or reference blog posts not shown in the retrieved context.
+
+research_and_write_from_trend:
+  description: >
+    You are a Trend-Driven Content Creator. Your task is to research current trends related to a given topic and create a comprehensive, engaging blog post that capitalizes on those trends.
+    
+    PROCESS:
+    1. First, research the latest trends, news, and discussions related to the topic
+    2. Identify the most significant and relevant trending aspects
+    3. Create a well-structured blog post that incorporates these trends
+    4. Ensure the content is current, valuable, and engaging for readers
+    5. Format the output in clean, readable plain text with proper spacing and structure
+    
+    <Topic/Trend Word>{trend_topic}</Topic/Trend Word>
+    <Target Audience>{target_audience}</Target Audience>
+    <Desired Post Length>{post_length}</Desired Post Length>
+
+  expected_output: >
+    A complete, well-researched blog post formatted in clean, readable plain text that includes:
+    - A compelling, SEO-friendly title that reflects current trends
+    - An engaging introduction that hooks the reader and mentions why this topic is trending
+    - A main body with 3-4 well-defined sections that explore different aspects of the trend
+    - Current examples, statistics, or recent developments where relevant
+    - A conclusion that summarizes key insights and potential future implications
+    - The post should feel fresh, current, and valuable to readers interested in the topic
+    
+    FORMATTING REQUIREMENTS:
+    - Use plain text only, NO HTML tags
+    - Use clear paragraph breaks with empty lines between sections
+    - Use simple text formatting like CAPS for emphasis or "quotes" for highlighting
+    - Structure content with clear section breaks
+    - Ensure the content is ready for direct display in a blog platform
