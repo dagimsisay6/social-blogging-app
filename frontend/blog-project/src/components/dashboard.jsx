@@ -1,9 +1,54 @@
-// src/components/Dashboard.jsx
-import React from "react";
-import { useAuth } from "../context/AuthContext"; // Import the auth context
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
-  const { user, loading } = useAuth();
+  const { user, token, loading } = useAuth();
+  const [posts, setPosts] = useState([]);
+  const [loadingPosts, setLoadingPosts] = useState(true);
+  const navigate = useNavigate();
+
+  // Fetch the user's posts
+  const fetchUserPosts = async () => {
+    if (!token) return;
+    try {
+      const res = await axios.get("http://localhost:5001/api/posts/my-posts", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setPosts(res.data);
+    } catch (err) {
+      console.error("Error fetching user posts:", err);
+    } finally {
+      setLoadingPosts(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchUserPosts();
+  }, [token]);
+
+  // Handle like toggle
+  const handleLike = async (id, e) => {
+    e.stopPropagation(); // ⛔ Stop the card click
+    try {
+      const res = await axios.post(
+        `http://localhost:5001/api/posts/${id}/like`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      const { likesCount } = res.data;
+
+      setPosts((prev) =>
+        prev.map((p) =>
+          p._id === id ? { ...p, likes: new Array(likesCount).fill("x") } : p
+        )
+      );
+    } catch (err) {
+      console.error("Error liking post:", err);
+    }
+  };
 
   if (loading) {
     return <div className="p-6 text-center">Loading your dashboard...</div>;
@@ -25,14 +70,19 @@ const Dashboard = () => {
         </div>
       </header>
 
-      <main className="dashboard-content p-4">
+      <main className="dashboard-content p-4 max-w-7xl mx-auto">
         {/* User Profile Section */}
         <section className="user-profile bg-white p-6 rounded-lg shadow-md mb-6 flex items-center">
           <img
-            src={user.profilePicture || "https://via.placeholder.com/100"}
+            src={
+              user.profilePicture
+                ? `${user.profilePicture}?t=${Date.now()}`
+                : "https://via.placeholder.com/100"
+            }
             alt={`${user.firstName} ${user.lastName}`}
             className="w-24 h-24 rounded-full object-cover mr-6 border-4 border-blue-500"
           />
+
           <div>
             <h2 className="text-3xl font-bold text-gray-800">
               {user.firstName} {user.lastName}
@@ -46,6 +96,55 @@ const Dashboard = () => {
             Posts
           </button>
         </nav>
+
+        {/* User Posts Grid */}
+        <section>
+          {loadingPosts ? (
+            <p className="text-center text-gray-600">Loading your posts...</p>
+          ) : posts.length === 0 ? (
+            <p className="text-center text-gray-600">
+              You haven't created any posts yet.
+            </p>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {posts.map((post) => (
+                <div
+                  key={post._id}
+                  className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden cursor-pointer hover:shadow-lg transition"
+                  onClick={() => navigate(`/posts/${post._id}`)}
+                >
+                  {post.images?.length > 0 && (
+                    <img
+                      src={`http://localhost:5001${post.images[0]}`}
+                      alt={post.title}
+                      className="w-full h-40 object-cover"
+                    />
+                  )}
+
+                  <div className="p-4">
+                    <h2 className="text-lg font-semibold text-gray-900 dark:text-white truncate">
+                      {post.title}
+                    </h2>
+                    <p className="text-gray-700 dark:text-gray-300 mt-1 line-clamp-2">
+                      {post.content}
+                    </p>
+                    <div className="flex justify-between items-center mt-3">
+                      <button
+                        onClick={(e) => handleLike(post._id, e)}
+                        className="text-blue-500 hover:text-blue-700"
+                      >
+                        👍 {post.likes?.length || 0}
+                      </button>
+                      <span className="text-gray-400 text-sm">
+                        {new Date(post.createdAt).toLocaleDateString()}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
       </main>
     </div>
   );

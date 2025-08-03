@@ -1,3 +1,4 @@
+// src/App.jsx
 import React from "react";
 import {
   BrowserRouter as Router,
@@ -15,6 +16,10 @@ import ResetPasswordPage from "./pages/resetPasswordPage";
 import Navbar from "./components/navBar";
 import Sidebar from "./components/sideBar.jsx";
 import Dashboard from "./components/dashboard";
+import CreatePost from "./pages/CreatePost.jsx";
+import MyPosts from "./pages/MyPosts.jsx";
+import PostDetails from "./pages/PostDetails.jsx";
+import EditPost from "./pages/EditPost.jsx"; // ✅ Import EditPost
 
 // --- ProtectedRoute Component ---
 const ProtectedRoute = ({ children }) => {
@@ -47,17 +52,13 @@ function App() {
             <Sidebar />
             <main className="flex-1 overflow-y-auto p-4 lg:ml-64 transition-all duration-300 ease-in-out">
               <Routes>
-                {/* Public Routes */}
+                {/* --- Public Routes --- */}
                 <Route path="/" element={<WelcomePage />} />
                 <Route path="/signup" element={<SignUpPage />} />
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/reset-password" element={<ResetPasswordPage />} />
-                <Route
-                  path="/posts"
-                  element={<div>All Posts Page (Public)</div>}
-                />
 
-                {/* Protected Routes - only accessible when authenticated */}
+                {/* --- Protected Routes --- */}
                 <Route
                   path="/dashboard"
                   element={
@@ -70,12 +71,7 @@ function App() {
                   path="/create-post"
                   element={
                     <ProtectedRoute>
-                      <h2 className="text-2xl font-bold mb-4 dark:text-white">
-                        Create New Post
-                      </h2>
-                      <p className="dark:text-gray-300">
-                        This is a protected page for creating posts.
-                      </p>
+                      <CreatePost />
                     </ProtectedRoute>
                   }
                 />
@@ -83,17 +79,23 @@ function App() {
                   path="/my-posts"
                   element={
                     <ProtectedRoute>
-                      <h2 className="text-2xl font-bold mb-4 dark:text-white">
-                        My Posts
-                      </h2>
-                      <p className="dark:text-gray-300">
-                        This is a protected page showing only your posts.
-                      </p>
+                      <MyPosts />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/edit-post/:id"
+                  element={
+                    <ProtectedRoute>
+                      <EditPost />
                     </ProtectedRoute>
                   }
                 />
 
-                {/* Catch-all for undefined routes */}
+                {/* --- Post Details Page --- */}
+                <Route path="/posts/:id" element={<PostDetails />} />
+
+                {/* --- 404 Page --- */}
                 <Route
                   path="*"
                   element={
