@@ -12,7 +12,7 @@ const MyPosts = () => {
   const { token } = useAuth();
   const navigate = useNavigate();
 
-  const serverUrl = "http://localhost:5001";
+  const serverUrl = "https://social-blogging-app-1-5k7h.onrender.com";
 
   const NAVBAR_HEIGHT = 70;
   const SIDEBAR_WIDTH = 100;
@@ -74,9 +74,9 @@ const MyPosts = () => {
         prev.map((p) =>
           p._id === id
             ? {
-                ...p,
-                likes: new Array(likesCount).fill("dummy"),
-              }
+              ...p,
+              likes: new Array(likesCount).fill("dummy"),
+            }
             : p
         )
       );

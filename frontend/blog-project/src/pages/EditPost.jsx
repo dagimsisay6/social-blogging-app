@@ -16,7 +16,7 @@ const EditPost = () => {
   useEffect(() => {
     const fetchPost = async () => {
       try {
-        const res = await axios.get(`http://localhost:5001/api/posts/${id}`);
+        const res = await axios.get(`https://social-blogging-app-1-5k7h.onrender.com/api/posts/${id}`);
         setFormData({ title: res.data.title, content: res.data.content });
       } catch (err) {
         console.error("Error fetching post:", err);
@@ -43,7 +43,7 @@ const EditPost = () => {
       formDataObj.append("content", formData.content);
       imageFiles.forEach((file) => formDataObj.append("images", file));
 
-      await axios.put(`http://localhost:5001/api/posts/${id}`, formDataObj, {
+      await axios.put(`https://social-blogging-app-1-5k7h.onrender.com/api/posts/${id}`, formDataObj, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data",

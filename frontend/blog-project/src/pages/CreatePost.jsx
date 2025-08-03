@@ -36,7 +36,7 @@ const CreatePost = () => {
 
       imageFiles.forEach((file) => formDataObj.append("images", file));
 
-      await axios.post("http://localhost:5001/api/posts", formDataObj, {
+      await axios.post("https://social-blogging-app-1-5k7h.onrender.com/api/posts", formDataObj, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data",

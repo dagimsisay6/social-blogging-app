@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 
 const ResetPasswordPage = () => {
   const navigate = useNavigate();
-  const API_URL = 'http://localhost:5001/api/auth';
+  const API_URL = 'https://social-blogging-app-1-5k7h.onrender.com/api/auth';
 
   // State to manage the two steps of the form
   const [email, setEmail] = useState('');

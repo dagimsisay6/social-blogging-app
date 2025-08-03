@@ -10,7 +10,7 @@ const Dashboard = () => {
   const [loadingPosts, setLoadingPosts] = useState(true);
   const navigate = useNavigate();
 
-  const serverUrl = "http://localhost:5001";
+  const serverUrl = "https://social-blogging-app-1-5k7h.onrender.com";
   const NAVBAR_HEIGHT = 70;
 
   const fetchUserPosts = async () => {

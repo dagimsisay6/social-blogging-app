@@ -12,7 +12,7 @@ const AllPosts = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [limit] = useState(10);
 
-  const serverUrl = "http://localhost:5001";
+  const serverUrl = "https://social-blogging-app-1-5k7h.onrender.com";
   const NAVBAR_HEIGHT = 64; // px
 
   useEffect(() => {
@@ -173,11 +173,10 @@ const AllPosts = () => {
                   <button
                     key={index}
                     onClick={() => handlePageChange(index + 1)}
-                    className={`px-4 py-2 text-sm font-semibold rounded-lg transition-colors duration-200 ${
-                      currentPage === index + 1
+                    className={`px-4 py-2 text-sm font-semibold rounded-lg transition-colors duration-200 ${currentPage === index + 1
                         ? "bg-blue-600 text-white"
                         : "bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600"
-                    }`}
+                      }`}
                   >
                     {index + 1}
                   </button>

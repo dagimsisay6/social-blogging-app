@@ -7,7 +7,7 @@ import React, {
 } from "react";
 import axios from "axios";
 
-axios.defaults.baseURL = "http://localhost:5001";
+axios.defaults.baseURL = "https://social-blogging-app-1-5k7h.onrender.com";
 
 const AuthContext = createContext(null);
 
@@ -26,9 +26,8 @@ export const AuthProvider = ({ children }) => {
 
         // Append timestamp to bust cache for profile picture
         if (res.data.profilePicture) {
-          res.data.profilePicture = `${
-            res.data.profilePicture
-          }?t=${Date.now()}`;
+          res.data.profilePicture = `${res.data.profilePicture
+            }?t=${Date.now()}`;
         }
         setUser(res.data);
         setIsAuthenticated(true);
@@ -65,9 +64,8 @@ export const AuthProvider = ({ children }) => {
 
       // Add timestamp to profile picture on login user object too
       if (res.data.user.profilePicture) {
-        res.data.user.profilePicture = `${
-          res.data.user.profilePicture
-        }?t=${Date.now()}`;
+        res.data.user.profilePicture = `${res.data.user.profilePicture
+          }?t=${Date.now()}`;
       }
       setUser(res.data.user);
       setIsAuthenticated(true);

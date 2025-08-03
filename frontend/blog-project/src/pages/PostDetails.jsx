@@ -14,7 +14,7 @@ const PostDetails = () => {
   const [commentText, setCommentText] = useState("");
   const [message, setMessage] = useState("");
 
-  const serverUrl = "http://localhost:5001";
+  const serverUrl = "https://social-blogging-app-1-5k7h.onrender.com";
 
   // Fetch single post
   const fetchPost = async () => {
