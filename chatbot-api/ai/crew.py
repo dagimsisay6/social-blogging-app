@@ -4,11 +4,15 @@ from dotenv import load_dotenv
 import yaml
 import os
 
+# Import our custom tools
+from ai.tools import get_blog_retrieval_tool
+
 # Load environment variables
 load_dotenv()
 
 # --- TOOL DEFINITION ---
 search_tool = TavilySearchTool()
+blog_retrieval_tool = get_blog_retrieval_tool()
 
 # Configure LLM
 llm = LLM(
@@ -67,7 +71,7 @@ chat_agent = Agent(
     role=agents_config['chat_agent']['role'],
     goal=agents_config['chat_agent']['goal'],
     backstory=agents_config['chat_agent']['backstory'],
-    tools=[],  # Will add retrieval tool later
+    tools=[blog_retrieval_tool],  # Now has access to the knowledge base!
     verbose=True,
     allow_delegation=False
 )

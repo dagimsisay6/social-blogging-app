@@ -12,9 +12,10 @@ A multi-agentic AI system built with CrewAI framework for the social blogging pl
 
 ### 🔍 RAG (Retrieval-Augmented Generation)
 - Vector store using ChromaDB
+- Google's text-embedding-004 model via API (768 dimensions)
 - Semantic search over blog content
 - Context-aware responses
-- Automatic embedding generation
+- Automatic embedding generation via Google AI
 
 ### 🌐 API Endpoints
 - `POST /api/ai/trends` - Get trending topics

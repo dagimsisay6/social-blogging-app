@@ -10,6 +10,10 @@ import os
 import json
 from datetime import datetime
 import logging
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -17,14 +21,29 @@ logger = logging.getLogger(__name__)
 
 class BlogRAGSystem:
     def __init__(self, persist_directory: str = "./chroma_db"):
-        """Initialize the RAG system with ChromaDB."""
+        """Initialize the RAG system with ChromaDB and Google embeddings."""
         self.persist_directory = persist_directory
         
         # Initialize ChromaDB client
         self.client = chromadb.PersistentClient(path=persist_directory)
         
-        # Use default embedding function (can be replaced with custom embeddings)
-        self.embedding_function = embedding_functions.DefaultEmbeddingFunction()
+        # Use Google's embedding API
+        google_api_key = os.getenv("GOOGLE_API_KEY")
+        if not google_api_key:
+            logger.warning("GOOGLE_API_KEY not found, falling back to default embeddings")
+            self.embedding_function = embedding_functions.DefaultEmbeddingFunction()
+        else:
+            try:
+                # Use Google's text embedding model via API
+                self.embedding_function = embedding_functions.GoogleGenerativeAiEmbeddingFunction(
+                    api_key=google_api_key,
+                    model_name="models/text-embedding-004"  # Latest Google embedding model
+                )
+                logger.info("Using Google Generative AI embeddings (text-embedding-004)")
+            except Exception as e:
+                logger.error(f"Failed to initialize Google embeddings: {e}")
+                logger.info("Falling back to default embeddings")
+                self.embedding_function = embedding_functions.DefaultEmbeddingFunction()
         
         # Get or create collection
         self.collection = self.client.get_or_create_collection(
@@ -46,7 +65,7 @@ class BlogRAGSystem:
                 "post_id": post_id,
                 "title": title,
                 "author": author,
-                "tags": tags or [],
+                "tags": ", ".join(tags) if tags else "",  # Convert list to string
                 "created_at": datetime.now().isoformat(),
                 **(metadata or {})
             }
