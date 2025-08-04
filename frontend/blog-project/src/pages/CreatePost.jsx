@@ -13,6 +13,9 @@ const CreatePost = () => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
+  const NAVBAR_HEIGHT = 70;
+  const SIDEBAR_WIDTH = 200;
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
@@ -50,53 +53,67 @@ const CreatePost = () => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto mt-8 p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">
-        Create a New Post
-      </h2>
+    <div
+      style={{
+        marginTop: NAVBAR_HEIGHT,
+        marginRight: 0, // default for mobile
+        minHeight: `calc(100vh - ${NAVBAR_HEIGHT}px)`,
+      }}
+      className="dark:bg-gray-900 text-gray-900 dark:text-white p-4 flex justify-center"
+    >
+      <div
+        className="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md w-full max-w-2xl"
+        style={{
+          marginRight: 0,
+        }}
+      >
+        <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">
+          Create a New Post
+        </h2>
 
-      {message && (
-        <div className="mb-4 text-center text-sm text-blue-600 dark:text-blue-400">
-          {message}
-        </div>
-      )}
+        {message && (
+          <div className="mb-4 text-center text-sm text-blue-600 dark:text-blue-400">
+            {message}
+          </div>
+        )}
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <input
-          type="text"
-          name="title"
-          placeholder="Post Title"
-          value={formData.title}
-          onChange={handleChange}
-          required
-          className="w-full p-2 border rounded-md dark:bg-gray-700 dark:text-white"
-        />
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <input
+            type="text"
+            name="title"
+            placeholder="Post Title"
+            value={formData.title}
+            onChange={handleChange}
+            required
+            className="w-full p-2 border rounded-md dark:bg-gray-700 dark:text-white"
+          />
 
-        <textarea
-          name="content"
-          placeholder="Write your post..."
-          value={formData.content}
-          onChange={handleChange}
-          required
-          className="w-full p-2 border rounded-md h-40 dark:bg-gray-700 dark:text-white"
-        ></textarea>
+          <textarea
+            name="content"
+            placeholder="Write your post..."
+            value={formData.content}
+            onChange={handleChange}
+            required
+            className="w-full p-2 border rounded-md h-40 dark:bg-gray-700 dark:text-white"
+          ></textarea>
 
-        <input
-          type="file"
-          accept="image/*"
-          multiple
-          onChange={handleFileChange}
-          className="w-full p-2 border rounded-md dark:bg-gray-700 dark:text-white"
-        />
+          <input
+            type="file"
+            accept="image/*"
+            multiple
+            onChange={handleFileChange}
+            className="w-full p-2 border rounded-md dark:bg-gray-700 dark:text-white"
+          />
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition duration-200"
-        >
-          {loading ? "Creating..." : "Create Post"}
-        </button>
-      </form>
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition duration-200"
+          >
+            {loading ? "Creating..." : "Create Post"}
+          </button>
+        </form>
+      </div>
     </div>
   );
 };

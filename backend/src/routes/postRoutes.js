@@ -1,4 +1,3 @@
-// src/routes/postRoutes.js
 import express from "express";
 import { protect } from "../middleware/auth.js";
 import Post from "../models/Post.js";
@@ -6,14 +5,12 @@ import upload from "../middleware/upload.js";
 
 const router = express.Router();
 
-// =========================
 // GET All Posts (Public) - New route added
-// =========================
 router.get("/", async (req, res) => {
   try {
     const posts = await Post.find({})
-      .populate("author", "firstName lastName profilePicture") // Populate author details
-      .sort({ createdAt: -1 }); // Sort by newest first
+      .populate("author", "firstName lastName profilePicture")
+      .sort({ createdAt: -1 });
     res.json(posts);
   } catch (error) {
     console.error("Error fetching all posts:", error);
@@ -21,9 +18,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-// =========================
-// CREATE POST (with multiple images)
-// =========================
+// CREATE POST with multiple images
 router.post("/", protect, upload.array("images", 5), async (req, res) => {
   try {
     const { title, content } = req.body;
@@ -51,9 +46,7 @@ router.post("/", protect, upload.array("images", 5), async (req, res) => {
   }
 });
 
-// =========================
-// GET My Posts (Protected)
-// =========================
+// GET My Posts Protected
 router.get("/my-posts", protect, async (req, res) => {
   try {
     const posts = await Post.find({ author: req.user._id }).sort({
@@ -66,22 +59,7 @@ router.get("/my-posts", protect, async (req, res) => {
   }
 });
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-// =========================
 // GET All Posts (Public) with Pagination
-// =========================
 router.get("/", async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
@@ -89,7 +67,7 @@ router.get("/", async (req, res) => {
     const skip = (page - 1) * limit;
 
     const posts = await Post.find({})
-      .populate("author", "firstName lastName profilePicture") // Populate author details
+      .populate("author", "firstName lastName profilePicture")
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
@@ -109,33 +87,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// =========================
 // UPDATE Post (Protected)
-// =========================
 router.put("/:id", protect, upload.array("images", 5), async (req, res) => {
   try {
     const { title, content } = req.body;
@@ -164,9 +116,7 @@ router.put("/:id", protect, upload.array("images", 5), async (req, res) => {
   }
 });
 
-// =========================
 // DELETE Post (Protected)
-// =========================
 router.delete("/:id", protect, async (req, res) => {
   try {
     const post = await Post.findOneAndDelete({
@@ -186,9 +136,7 @@ router.delete("/:id", protect, async (req, res) => {
   }
 });
 
-// =========================
 // GET Single Post by ID (increments views)
-// =========================
 router.get("/:id", async (req, res) => {
   try {
     const post = await Post.findByIdAndUpdate(
@@ -208,9 +156,7 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-// =========================
 // ADD Comment to a Post
-// =========================
 router.post("/:id/comments", protect, async (req, res) => {
   try {
     const { text } = req.body;
@@ -238,9 +184,7 @@ router.post("/:id/comments", protect, async (req, res) => {
   }
 });
 
-// =========================
 // TOGGLE Like/Unlike a Post
-// =========================
 router.post("/:id/like", protect, async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);

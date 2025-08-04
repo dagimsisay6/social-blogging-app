@@ -48,8 +48,7 @@ const LoginPage = () => {
 
     if (validateForm()) {
       try {
-        // Use the login function from AuthContext instead of direct fetch
-        const result = await login(formData.email, formData.password); // <--- CHANGE THIS LINE
+        const result = await login(formData.email, formData.password);
 
         if (result.success) {
           // Check the success property from the result
@@ -60,7 +59,7 @@ const LoginPage = () => {
             navigate("/dashboard");
           }, 2000);
         } else {
-          console.error("Login failed:", result.message); // Log the error message
+          console.error("Login failed:", result.message);
           setMessage(`Error: ${result.message}`);
         }
       } catch (error) {

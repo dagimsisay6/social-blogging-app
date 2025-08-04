@@ -22,12 +22,13 @@ export const AuthProvider = ({ children }) => {
       axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
       try {
         const res = await axios.get("/api/auth/profile");
-        console.log("loadUser fetched profile:", res.data); // DEBUG log
+        console.log("loadUser fetched profile:", res.data);
 
         // Append timestamp to bust cache for profile picture
         if (res.data.profilePicture) {
-          res.data.profilePicture = `${res.data.profilePicture
-            }?t=${Date.now()}`;
+          res.data.profilePicture = `${
+            res.data.profilePicture
+          }?t=${Date.now()}`;
         }
         setUser(res.data);
         setIsAuthenticated(true);
@@ -64,8 +65,9 @@ export const AuthProvider = ({ children }) => {
 
       // Add timestamp to profile picture on login user object too
       if (res.data.user.profilePicture) {
-        res.data.user.profilePicture = `${res.data.user.profilePicture
-          }?t=${Date.now()}`;
+        res.data.user.profilePicture = `${
+          res.data.user.profilePicture
+        }?t=${Date.now()}`;
       }
       setUser(res.data.user);
       setIsAuthenticated(true);
