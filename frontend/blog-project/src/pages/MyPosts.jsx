@@ -1,10 +1,8 @@
-// pages/myPost.jsx
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import ConfirmationModal from "../components/ConfirmationModal";
-// Import the Lucide icons we will use
 import { Trash2, Pencil, ThumbsUp } from "lucide-react";
 const MyPosts = () => {
   const [posts, setPosts] = useState([]);
@@ -73,9 +71,9 @@ const MyPosts = () => {
         prev.map((p) =>
           p._id === id
             ? {
-              ...p,
-              likes: new Array(likesCount).fill("dummy"),
-            }
+                ...p,
+                likes: new Array(likesCount).fill("dummy"),
+              }
             : p
         )
       );

@@ -1,4 +1,3 @@
-// src/components/Sidebar.jsx
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useSidebar } from "../context/SideBarContext.jsx";
@@ -10,7 +9,7 @@ import {
   StickyNote,
   X,
   Menu,
-} from "lucide-react"; // Imported Lucide icons
+} from "lucide-react";
 
 const Sidebar = () => {
   const { isSidebarOpen, closeSidebar } = useSidebar();
@@ -78,10 +77,11 @@ const Sidebar = () => {
                     <Link
                       to={link.path}
                       onClick={closeSidebar}
-                      className={`flex items-center p-4 text-gray-700 dark:text-gray-300 hover:bg-blue-100 dark:hover:bg-gray-800 rounded-lg transition-colors duration-200 ${isActive
+                      className={`flex items-center p-4 text-gray-700 dark:text-gray-300 hover:bg-blue-100 dark:hover:bg-gray-800 rounded-lg transition-colors duration-200 ${
+                        isActive
                           ? "bg-blue-50 dark:bg-gray-700 text-blue-600 dark:text-blue-400 font-semibold border-l-4 border-blue-600"
                           : ""
-                        }`}
+                      }`}
                     >
                       <span className="mr-3">{link.icon}</span>
                       {link.name}

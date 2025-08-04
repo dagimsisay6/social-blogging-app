@@ -1,17 +1,14 @@
-import React, { useState, useRef, useEffect, memo } from 'react';
-import { User, Send, ChevronLeft, MessageSquareText } from 'lucide-react';
-import { AnimatePresence, motion } from 'framer-motion';
+import React, { useState, useRef, useEffect, memo } from "react";
+import { User, Send, ChevronLeft, MessageSquareText } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
+import botAvatar from "../assets/bot.png";
+import thinkingDots from "../assets/loading.png";
 
-// Import the specific images from the assets folder
-import botAvatar from '../assets/bot.png';
-import thinkingDots from '../assets/loading.png';
-
-const AI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent";
-const API_KEY = ""; // Canvas runtime will inject this
-
-// Memoized component for chat messages to prevent unnecessary re-renders
+const AI_API_URL =
+  "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent";
+const API_KEY = "";
 const ChatMessage = memo(({ message }) => {
-  const isUser = message.sender === 'user';
+  const isUser = message.sender === "user";
   const isThinking = message.isThinking;
 
   return (
@@ -19,12 +16,18 @@ const ChatMessage = memo(({ message }) => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className={`flex items-start gap-3 p-2 rounded-2xl ${isUser ? 'justify-end' : 'justify-start'}`}
+      className={`flex items-start gap-3 p-2 rounded-2xl ${
+        isUser ? "justify-end" : "justify-start"
+      }`}
     >
       {/* Conditionally render the avatar based on sender and state */}
       {!isUser && (
         <div className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center p-1 bg-white shadow-sm">
-          <img src={botAvatar} alt="AI Avatar" className="w-full h-full object-cover" />
+          <img
+            src={botAvatar}
+            alt="AI Avatar"
+            className="w-full h-full object-cover"
+          />
         </div>
       )}
 
@@ -35,7 +38,13 @@ const ChatMessage = memo(({ message }) => {
           <img src={thinkingDots} alt="Thinking..." className="h-8 w-auto" />
         </div>
       ) : (
-        <div className={`p-4 rounded-xl max-w-sm lg:max-w-md ${isUser ? 'bg-gray-600 text-white shadow-md rounded-br-none' : 'bg-blue-600 text-white shadow-md rounded-bl-none'}`}>
+        <div
+          className={`p-4 rounded-xl max-w-sm lg:max-w-md ${
+            isUser
+              ? "bg-gray-600 text-white shadow-md rounded-br-none"
+              : "bg-blue-600 text-white shadow-md rounded-bl-none"
+          }`}
+        >
           <p className="font-sans text-sm">{message.text}</p>
         </div>
       )}
@@ -52,9 +61,13 @@ const ChatMessage = memo(({ message }) => {
 const ChatbotWidget = () => {
   const [isChatbotOpen, setIsChatbotOpen] = useState(false);
   const [messages, setMessages] = useState([
-    { sender: 'ai', text: "Hello! I'm Bloggy, your AI writing assistant. Need help writing your first post?", isThinking: false },
+    {
+      sender: "ai",
+      text: "Hello! I'm Bloggy, your AI writing assistant. Need help writing your first post?",
+      isThinking: false,
+    },
   ]);
-  const [inputMessage, setInputMessage] = useState('');
+  const [inputMessage, setInputMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef(null);
 
@@ -62,62 +75,79 @@ const ChatbotWidget = () => {
     "Would you like to schedule this post or publish now?",
     "Would you like blog title suggestions?",
     "Want to add an image with alt text?",
-    "Do you want me to check your blog for clarity and tone?"
+    "Do you want me to check your blog for clarity and tone?",
   ];
 
   // Effect to scroll to the bottom of the chat window
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isChatbotOpen]);
 
   const handleSendMessage = async (textToSend) => {
     if (!textToSend.trim() || isLoading) return;
 
     // Add user's message
-    const newUserMessage = { sender: 'user', text: textToSend };
+    const newUserMessage = { sender: "user", text: textToSend };
     setMessages((prevMessages) => [...prevMessages, newUserMessage]);
 
-    setInputMessage('');
+    setInputMessage("");
     setIsLoading(true);
 
     // Add thinking message
-    const thinkingMessage = { sender: 'ai', text: '', isThinking: true };
+    const thinkingMessage = { sender: "ai", text: "", isThinking: true };
     setMessages((prevMessages) => [...prevMessages, thinkingMessage]);
 
     // Simulate network delay for better UX
-    await new Promise(resolve => setTimeout(resolve, 800));
+    await new Promise((resolve) => setTimeout(resolve, 800));
 
     try {
       // Build chat history for API call
-      const chatHistory = [...messages, newUserMessage].map(m => ({
-        role: m.sender === 'ai' ? 'model' : 'user',
+      const chatHistory = [...messages, newUserMessage].map((m) => ({
+        role: m.sender === "ai" ? "model" : "user",
         parts: [{ text: m.text }],
       }));
 
       const payload = { contents: chatHistory };
 
       const response = await fetch(AI_API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
 
       const result = await response.json();
 
       // Remove thinking message
-      setMessages((prevMessages) => prevMessages.filter(m => !m.isThinking));
+      setMessages((prevMessages) => prevMessages.filter((m) => !m.isThinking));
 
       if (result.candidates?.[0]?.content?.parts?.[0]?.text) {
         const text = result.candidates[0].content.parts[0].text;
-        setMessages((prevMessages) => [...prevMessages, { sender: 'ai', text, isThinking: false }]);
+        setMessages((prevMessages) => [
+          ...prevMessages,
+          { sender: "ai", text, isThinking: false },
+        ]);
       } else {
-        setMessages((prevMessages) => [...prevMessages, { sender: 'ai', text: "I'm sorry, I couldn't generate a response. Please try again.", isThinking: false }]);
+        setMessages((prevMessages) => [
+          ...prevMessages,
+          {
+            sender: "ai",
+            text: "I'm sorry, I couldn't generate a response. Please try again.",
+            isThinking: false,
+          },
+        ]);
       }
     } catch (error) {
       console.error("API call failed:", error);
       // Remove thinking message and show error
-      setMessages((prevMessages) => prevMessages.filter(m => !m.isThinking));
-      setMessages((prevMessages) => [...prevMessages, { sender: 'ai', text: "A network error occurred. Please try again.", isThinking: false }]);
+      setMessages((prevMessages) => prevMessages.filter((m) => !m.isThinking));
+      setMessages((prevMessages) => [
+        ...prevMessages,
+        {
+          sender: "ai",
+          text: "A network error occurred. Please try again.",
+          isThinking: false,
+        },
+      ]);
     } finally {
       setIsLoading(false);
     }
@@ -148,7 +178,10 @@ const ChatbotWidget = () => {
           >
             {/* Header */}
             <div className="flex items-center justify-between p-4 bg-white shadow-sm">
-              <button onClick={() => setIsChatbotOpen(false)} className="text-gray-600 hover:text-gray-800 transition-colors">
+              <button
+                onClick={() => setIsChatbotOpen(false)}
+                className="text-gray-600 hover:text-gray-800 transition-colors"
+              >
                 <ChevronLeft size={24} />
               </button>
               <div className="flex-1 text-center flex items-center justify-center">
@@ -168,7 +201,9 @@ const ChatbotWidget = () => {
 
             {/* Suggestions */}
             <div className="p-4 bg-gray-100 border-t border-gray-200 space-y-2">
-              <h3 className="text-center text-sm font-semibold text-gray-500">Suggestion prompts</h3>
+              <h3 className="text-center text-sm font-semibold text-gray-500">
+                Suggestion prompts
+              </h3>
               <div className="grid grid-cols-2 gap-2">
                 {suggestionPrompts.map((prompt, index) => (
                   <motion.button
@@ -187,10 +222,13 @@ const ChatbotWidget = () => {
 
             {/* Input */}
             <div className="p-4 bg-white border-t border-gray-200">
-              <form onSubmit={(e) => {
-                e.preventDefault();
-                handleSendMessage(inputMessage);
-              }} className="flex items-center gap-2">
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleSendMessage(inputMessage);
+                }}
+                className="flex items-center gap-2"
+              >
                 <input
                   type="text"
                   value={inputMessage}

@@ -1,9 +1,6 @@
-// loginPage.jsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-// Import useAuth hook from your AuthContext
-import { useAuth } from "../context/AuthContext"; // Adjust path as necessary
-// Using inline SVGs for icons to avoid needing an external library
+import { useAuth } from "../context/AuthContext";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 
 const LoginPage = () => {
@@ -57,9 +54,7 @@ const LoginPage = () => {
         if (result.success) {
           // Check the success property from the result
           setMessage("Login successful! Redirecting to dashboard...");
-          console.log("Login successful:", result.message); // Log the success message
-          // The AuthContext's login already handles setting the token and isAuthenticated state
-          // No need to manually set localStorage.setItem("token", data.token); here anymore.
+          console.log("Login successful:", result.message);
 
           setTimeout(() => {
             navigate("/dashboard");
@@ -76,7 +71,7 @@ const LoginPage = () => {
     setLoading(false);
   };
 
-  // ... (rest of the component remains the same)
+  // rest of the component remains the same
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 p-6">
       <div className="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-lg">
@@ -232,20 +227,6 @@ const LoginPage = () => {
           <div className="flex-grow border-t border-gray-300"></div>
         </div>
 
-        {/* Google Login Button */}
-        {/* <button
-          onClick={handleGoogleLogin}
-          className="w-full flex items-center justify-center py-3 border-2 border-gray-300 text-gray-700 font-semibold rounded-xl shadow-sm hover:bg-gray-100 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50"
-        >
-          <img
-            src="https://www.google.com/favicon.ico"
-            alt="Google logo"
-            className="h-5 w-5 mr-2"
-          />
-          Log In with your Google account
-        </button> */}
-
-        {/* Sign Up Link */}
         <div className="text-center mt-6">
           <p className="text-gray-700">
             Don't have an account?{" "}

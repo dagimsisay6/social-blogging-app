@@ -26,7 +26,7 @@ const ProfilePictureUploader = ({ onClose }) => {
           Authorization: `Bearer ${token}`,
         },
       });
-      console.log("Profile picture upload response:", res.data); // DEBUG log
+      console.log("Profile picture upload response:", res.data);
 
       await loadUser(); // refresh user data with new picture URL
       onClose(); // close the modal

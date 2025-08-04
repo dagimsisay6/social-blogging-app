@@ -1,4 +1,3 @@
-// src/components/ConfirmationModal.jsx
 import React from "react";
 import { X, AlertCircle } from "lucide-react";
 
@@ -8,7 +7,6 @@ const ConfirmationModal = ({ isOpen, onClose, onConfirm, message }) => {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-sm relative transform transition-all duration-300 scale-100 opacity-100 animate-fadeIn">
-
         {/* Close Button */}
         <button
           onClick={onClose}

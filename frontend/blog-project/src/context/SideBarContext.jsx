@@ -1,10 +1,5 @@
-// src/context/SidebarContext.jsx
 import React, { createContext, useState, useContext } from "react";
-
-// 1. Create the Context
 const SidebarContext = createContext(null);
-
-// 2. Create the Provider Component
 export const SidebarProvider = ({ children }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
