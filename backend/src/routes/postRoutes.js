@@ -5,13 +5,91 @@ import upload from "../middleware/upload.js";
 
 const router = express.Router();
 
-// GET All Posts (Public) - New route added
+// A single, robust GET route for posts with pagination and search functionality.
 router.get("/", async (req, res) => {
   try {
-    const posts = await Post.find({})
-      .populate("author", "firstName lastName profilePicture")
-      .sort({ createdAt: -1 });
-    res.json(posts);
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+    const searchTerm = req.query.search || "";
+
+    // The aggregation pipeline to handle search, pagination, and author population.
+    const pipeline = [];
+
+    // 1. Match posts based on the search term (case-insensitive).
+    // This is the first stage to filter the data before further processing.
+    if (searchTerm) {
+      pipeline.push({
+        $match: {
+          $or: [
+            { title: { $regex: searchTerm, $options: "i" } },
+            { content: { $regex: searchTerm, $options: "i" } },
+          ],
+        },
+      });
+    }
+
+    // 2. Use $facet to run multiple pipelines in a single query.
+    // This allows us to get both the paginated results and the total count.
+    pipeline.push({
+      $facet: {
+        metadata: [{ $count: "totalPosts" }],
+        data: [
+          // 3. Sort by creation date in descending order (newest first).
+          { $sort: { createdAt: -1 } },
+          // 4. Skip the posts based on the current page.
+          { $skip: skip },
+          // 5. Limit the number of posts per page.
+          // This is the critical part to ensure only 10 posts are returned.
+          { $limit: limit },
+          // 6. Look up the author details from the "users" collection.
+          {
+            $lookup: {
+              from: "users", // The name of the user collection
+              localField: "author", // The field in the current Post collection
+              foreignField: "_id", // The field in the "users" collection
+              as: "author", // The output array field name
+            },
+          },
+          // 7. Deconstruct the author array field to a single object.
+          {
+            $unwind: "$author",
+          },
+          // 8. Project the final output, selecting only the necessary fields and
+          // adding a count for likes and comments.
+          {
+            $project: {
+              title: 1,
+              content: 1,
+              images: 1,
+              createdAt: 1,
+              views: 1,
+              commentsCount: { $size: "$comments" },
+              likesCount: { $size: "$likes" },
+              author: {
+                _id: "$author._id",
+                firstName: "$author.firstName",
+                lastName: "$author.lastName",
+                profilePicture: "$author.profilePicture",
+              },
+            },
+          },
+        ],
+      },
+    });
+
+    const result = await Post.aggregate(pipeline);
+
+    const [{ metadata, data }] = result;
+    const totalPosts = metadata.length > 0 ? metadata[0].totalPosts : 0;
+    const totalPages = Math.ceil(totalPosts / limit);
+
+    res.status(200).json({
+      posts: data,
+      currentPage: page,
+      totalPages,
+      totalPosts,
+    });
   } catch (error) {
     console.error("Error fetching all posts:", error);
     res.status(500).json({ message: "Server error fetching posts" });
@@ -59,35 +137,7 @@ router.get("/my-posts", protect, async (req, res) => {
   }
 });
 
-// GET All Posts (Public) with Pagination
-router.get("/", async (req, res) => {
-  try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const skip = (page - 1) * limit;
 
-    const posts = await Post.find({})
-      .populate("author", "firstName lastName profilePicture")
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit);
-
-    const totalPosts = await Post.countDocuments({});
-    const totalPages = Math.ceil(totalPosts / limit);
-
-    res.status(200).json({
-      posts,
-      currentPage: page,
-      totalPages,
-      totalPosts,
-    });
-  } catch (error) {
-    console.error("Error fetching all posts:", error);
-    res.status(500).json({ message: "Server error fetching posts" });
-  }
-});
-
-// UPDATE Post (Protected)
 router.put("/:id", protect, upload.array("images", 5), async (req, res) => {
   try {
     const { title, content } = req.body;

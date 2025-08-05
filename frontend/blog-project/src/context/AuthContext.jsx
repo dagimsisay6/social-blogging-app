@@ -7,7 +7,7 @@ import React, {
 } from "react";
 import axios from "axios";
 
-axios.defaults.baseURL = "https://social-blogging-app-1-5k7h.onrender.com";
+axios.defaults.baseURL = "http://localhost:5001";
 
 const AuthContext = createContext(null);
 

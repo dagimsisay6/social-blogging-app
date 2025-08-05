@@ -42,6 +42,7 @@ export const login = async (req, res) => {
       return res.status(400).json({ msg: "Invalid Credentials" });
     }
 
+
     const isMatch = await user.matchPassword(password);
     if (!isMatch) {
       return res.status(400).json({ msg: "Invalid Credentials" });
@@ -106,7 +107,7 @@ export const resetPasswordUnsecured = async (req, res) => {
       return res.status(404).json({ msg: "User not found." });
     }
 
-    user.password = password; // pre('save') hook will hash this
+    user.password = password;
     await user.save();
 
     res.status(200).json({ msg: "Password updated successfully." });

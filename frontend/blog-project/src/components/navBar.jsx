@@ -17,7 +17,7 @@ const Navbar = () => {
   const [showPictureUploader, setShowPictureUploader] = useState(false);
   const dropdownRef = useRef(null);
 
-  const serverUrl = "https://social-blogging-app-1-5k7h.onrender.com";
+  const serverUrl = "http://localhost:5001";
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", isDarkMode);

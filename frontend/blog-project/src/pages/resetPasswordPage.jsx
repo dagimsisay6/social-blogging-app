@@ -3,13 +3,11 @@ import { useNavigate } from 'react-router-dom';
 
 const ResetPasswordPage = () => {
   const navigate = useNavigate();
-  const API_URL = 'https://social-blogging-app-1-5k7h.onrender.com/api/auth';
+  const API_URL = 'http://localhost:5001/api/auth';
 
-  // State to manage the two steps of the form
   const [email, setEmail] = useState('');
   const [emailSubmitted, setEmailSubmitted] = useState(false);
 
-  // State for the new password fields
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
@@ -18,7 +16,6 @@ const ResetPasswordPage = () => {
   const [message, setMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
 
-  // Handle input changes for both forms
   const handleChange = (e) => {
     const { name, value } = e.target;
     if (name === 'email') {
@@ -30,7 +27,6 @@ const ResetPasswordPage = () => {
     }
   };
 
-  // Handle the first form submission (email verification)
   const handleEmailSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -68,7 +64,6 @@ const ResetPasswordPage = () => {
     }
   };
 
-  // Handle the second form submission (password reset)
   const handlePasswordReset = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -92,7 +87,6 @@ const ResetPasswordPage = () => {
     }
 
     try {
-      // New backend route to update the password directly
       const response = await fetch(`${API_URL}/reset-password-unsecured`, {
         method: 'POST',
         headers: {
@@ -165,7 +159,6 @@ const ResetPasswordPage = () => {
           </form>
         )}
 
-        {/* --- Form for Step 2: Password Reset --- */}
         {emailSubmitted && (
           <form onSubmit={handlePasswordReset} className="space-y-6">
             <div>

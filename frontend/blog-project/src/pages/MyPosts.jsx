@@ -12,10 +12,10 @@ const MyPosts = () => {
   const { token } = useAuth();
   const navigate = useNavigate();
 
-  const serverUrl = "https://social-blogging-app-1-5k7h.onrender.com";
+  const serverUrl = "http://localhost:5001";
 
-  const NAVBAR_HEIGHT = 70;
-  const SIDEBAR_WIDTH = 100;
+  const NAVBAR_HEIGHT = 100;
+  const SIDEBAR_WIDTH = 200;
 
   const fetchMyPosts = async () => {
     try {

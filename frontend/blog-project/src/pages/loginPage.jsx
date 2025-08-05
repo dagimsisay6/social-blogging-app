@@ -1,11 +1,10 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
+// import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 
 const LoginPage = () => {
   const navigate = useNavigate();
-  // Destructure the login function from useAuth
   const { login } = useAuth();
 
   // State to manage form data, updated to use 'email' to match the backend
@@ -19,7 +18,6 @@ const LoginPage = () => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
-  // State to manage password visibility
   const [showPassword, setShowPassword] = useState(false);
 
   // State for form validation errors
@@ -51,7 +49,6 @@ const LoginPage = () => {
         const result = await login(formData.email, formData.password);
 
         if (result.success) {
-          // Check the success property from the result
           setMessage("Login successful! Redirecting to dashboard...");
           console.log("Login successful:", result.message);
 
@@ -70,11 +67,9 @@ const LoginPage = () => {
     setLoading(false);
   };
 
-  // rest of the component remains the same
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 p-6">
       <div className="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-lg">
-        {/* Back Button */}
         <button
           onClick={() => navigate("/")}
           className="flex items-center text-gray-500 hover:text-gray-700 transition-colors duration-200"
@@ -96,15 +91,12 @@ const LoginPage = () => {
           Back
         </button>
 
-        {/* Header */}
         <div className="text-center mt-6 mb-8">
           <h1 className="text-4xl font-bold text-gray-800">Welcome back!</h1>
           <p className="text-lg text-gray-600 mt-2">Log in to your account</p>
         </div>
 
-        {/* Login Form */}
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Email Field */}
           <div>
             <label className="block text-gray-700 font-semibold mb-2">
               Email
@@ -115,16 +107,15 @@ const LoginPage = () => {
               value={formData.email}
               onChange={handleChange}
               placeholder="johndoe@example.com"
-              className={`w-full p-3 rounded-lg border-2 ${
-                errors.email ? "border-red-500" : "border-gray-300"
-              } focus:outline-none focus:border-blue-500 transition-colors`}
+              className={`w-full p-3 rounded-lg border-2 ${errors.email ? "border-red-500" : "border-gray-300"
+                } focus:outline-none focus:border-blue-500 transition-colors`}
             />
             {errors.email && (
               <p className="text-red-500 text-sm mt-1">{errors.email}</p>
             )}
           </div>
 
-          {/* Password Field */}
+
           <div>
             <label className="block text-gray-700 font-semibold mb-2">
               Password
@@ -136,9 +127,8 @@ const LoginPage = () => {
                 value={formData.password}
                 onChange={handleChange}
                 placeholder="Password"
-                className={`w-full p-3 rounded-lg border-2 ${
-                  errors.password ? "border-red-500" : "border-gray-300"
-                } focus:outline-none focus:border-blue-500 transition-colors`}
+                className={`w-full p-3 rounded-lg border-2 ${errors.password ? "border-red-500" : "border-gray-300"
+                  } focus:outline-none focus:border-blue-500 transition-colors`}
               />
               <button
                 type="button"
@@ -181,7 +171,7 @@ const LoginPage = () => {
             )}
           </div>
 
-          {/* Remember Me & Forgot Password */}
+
           <div className="flex items-center justify-between">
             <div className="flex items-center">
               <input
@@ -213,13 +203,12 @@ const LoginPage = () => {
             {loading ? "Logging In..." : "Log In"}
           </button>
 
-          {/* Display general message */}
+
           {message && (
             <p className="mt-4 text-center text-sm font-medium">{message}</p>
           )}
         </form>
 
-        {/* Separator */}
         <div className="flex items-center my-6">
           <div className="flex-grow border-t border-gray-300"></div>
           <span className="mx-4 text-sm text-gray-500">or</span>

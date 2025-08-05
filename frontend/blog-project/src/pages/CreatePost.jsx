@@ -36,7 +36,7 @@ const CreatePost = () => {
 
       imageFiles.forEach((file) => formDataObj.append("images", file));
 
-      await axios.post("https://social-blogging-app-1-5k7h.onrender.com/api/posts", formDataObj, {
+      await axios.post("http://localhost:5001/api/posts", formDataObj, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data",
@@ -56,7 +56,7 @@ const CreatePost = () => {
     <div
       style={{
         marginTop: NAVBAR_HEIGHT,
-        marginRight: 0, // default for mobile
+        marginRight: 0,
         minHeight: `calc(100vh - ${NAVBAR_HEIGHT}px)`,
       }}
       className="dark:bg-gray-900 text-gray-900 dark:text-white p-4 flex justify-center"

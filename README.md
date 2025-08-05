@@ -6,17 +6,17 @@ A full-stack social blogging platform that allows users to register, log in, wri
 
 🔗 **Frontend (Netlify):** https://idyllic-mandazi-bbce72.netlify.app/
 
-🔗 **Backend (Render):** https://social-blogging-app-1-5k7h.onrender.com
+🔗 **Backend (Render):** http://localhost:5001
 
 📁 **GitHub Repository:** https://github.com/your-org/social-blogging-app
 
 ## 👥 Team Members
 
-| Name | Role | GitHub Handle |
-|------|------|---------------|
-| Florence Ndemi | Frontend Engineer | @Fndemi |
-| Dagim Sisay | Frontend Engineer | @dagimsisay6 |
-| Solomon Nderitu | GenAI Engineer | @Solomon-Nderit |
+| Name            | Role              | GitHub Handle   |
+| --------------- | ----------------- | --------------- |
+| Florence Ndemi  | Frontend Engineer | @Fndemi         |
+| Dagim Sisay     | Frontend Engineer | @dagimsisay6    |
+| Solomon Nderitu | GenAI Engineer    | @Solomon-Nderit |
 
 ## 📌 Project Overview
 
@@ -44,22 +44,26 @@ The Social Blogging App enables users to:
 ## 🧰 Tech Stack
 
 ### Frontend
+
 - **React.js** (Vite)
 - **Tailwind CSS**
 - **Axios** for API calls
 - **React Router DOM** for navigation
 
 ### Backend
+
 - **Node.js** + **Express.js**
 - **MongoDB Atlas** + **Mongoose**
 - **JWT** & **bcrypt** for authentication
 - **dotenv**, **cors**, **express-validator**
 
 ### AI Integration
+
 - External AI Chatbot API (GenAI implementation)
 - Real-time chat interface
 
 ### Deployment
+
 - **Frontend:** Netlify
 - **Backend:** Render or Railway
 - **Database:** MongoDB Atlas
@@ -91,6 +95,7 @@ project-root/
 ## 🛠️ Getting Started
 
 ### Prerequisites
+
 - Node.js (v16 or higher)
 - MongoDB Atlas account
 - Git
@@ -98,12 +103,14 @@ project-root/
 ### Installation
 
 1. **Clone the repository:**
+
 ```bash
 git clone https://github.com/your-org/social-blogging-app.git
 cd social-blogging-app
 ```
 
 2. **Frontend Setup:**
+
 ```bash
 cd client
 npm install
@@ -111,6 +118,7 @@ npm run dev
 ```
 
 3. **Backend Setup:**
+
 ```bash
 cd server
 npm install
@@ -120,9 +128,11 @@ npm run dev
 ## 🔐 Environment Variables
 
 ### Frontend
+
 No environment variables needed - API endpoints are configured directly in the code.
 
 ### Backend (`server/.env`)
+
 ```env
 PORT=5001
 MONGO_URI=your_mongodb_connection_string
@@ -134,17 +144,21 @@ NODE_ENV=development
 ## 🚀 Deployment
 
 ### Frontend (Netlify)
+
 - Build command: `npm run build`
 - Publish directory: `dist`
 - Add environment variables in Netlify dashboard
 
 ### Backend (Render/Railway)
+
 - Connect GitHub repository
 - Set environment variables
 - Configure auto-deploy from `main` branch
 
 ### Redirect Handling
+
 Create `client/public/_redirects` file:
+
 ```
 /* /index.html 200
 ```
@@ -156,6 +170,7 @@ Create `client/public/_redirects` file:
 - **Feature branches** → `feat/feature-name`, `fix/bug-name`
 
 ### Commit Convention
+
 - `feat:` New features
 - `fix:` Bug fixes
 - `refactor:` Code refactoring
@@ -163,6 +178,7 @@ Create `client/public/_redirects` file:
 - `docs:` Documentation updates
 
 ### Development Process
+
 1. Create feature branch from `dev`
 2. Make changes and commit
 3. Push branch and create Pull Request
@@ -173,11 +189,13 @@ Create `client/public/_redirects` file:
 ## 📝 API Endpoints
 
 ### Authentication
+
 - `POST /api/auth/register` - User registration
 - `POST /api/auth/login` - User login
 - `POST /api/auth/logout` - User logout
 
 ### Blog Posts
+
 - `GET /api/posts` - Get all posts
 - `POST /api/posts` - Create new post
 - `GET /api/posts/:id` - Get single post
@@ -185,10 +203,12 @@ Create `client/public/_redirects` file:
 - `DELETE /api/posts/:id` - Delete post
 
 ### Comments
+
 - `POST /api/posts/:id/comments` - Add comment
 - `GET /api/posts/:id/comments` - Get post comments
 
 ### AI Chat
+
 - `POST /api/ai/chat` - Send message to AI
 - `GET /api/ai/history` - Get chat history
 

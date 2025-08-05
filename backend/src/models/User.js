@@ -29,7 +29,7 @@ const UserSchema = new mongoose.Schema({
   },
 });
 
-// Middleware to hash the password before saving a new user
+
 UserSchema.pre("save", async function (next) {
   if (!this.isModified("password")) {
     return next();
@@ -40,7 +40,6 @@ UserSchema.pre("save", async function (next) {
   next();
 });
 
-// ADD THIS METHOD TO YOUR SCHEMA
 UserSchema.methods.matchPassword = async function (enteredPassword) {
   // 'this.password' refers to the hashed password stored in the database for this user
   return await bcrypt.compare(enteredPassword, this.password);

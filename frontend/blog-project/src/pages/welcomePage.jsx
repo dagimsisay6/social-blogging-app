@@ -16,7 +16,6 @@ const WelcomePage = () => {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-6 bg-white sm:p-10">
       <div className="flex flex-col items-center max-w-sm w-full text-center gap-8">
-        {/* Top Section: Text and Illustration */}
         <div className="flex flex-col items-center w-full">
           <h1 className="text-4xl font-bold text-gray-800 mb-2">
             Welcome to Blog Bridge
@@ -35,7 +34,6 @@ const WelcomePage = () => {
           </div>
         </div>
 
-        {/* Bottom Section: Buttons */}
         <div className="w-full flex flex-col gap-4">
           <button
             onClick={handleSignUp}

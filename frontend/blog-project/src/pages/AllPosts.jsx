@@ -1,36 +1,50 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
-import { UserRound, Heart, MessageSquare } from "lucide-react";
+import { UserRound, Heart, MessageSquare, Search } from "lucide-react";
 
+// The updated AllPosts component now includes a search bar to filter posts.
 const AllPosts = () => {
+  // State for posts and loading status
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // State for pagination and search
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [limit] = useState(10);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [pendingSearchTerm, setPendingSearchTerm] = useState("");
 
-  const serverUrl = "https://social-blogging-app-1-5k7h.onrender.com";
-  const NAVBAR_HEIGHT = 64; // px
-
+  const serverUrl = "http://localhost:5001";
+  const NAVBAR_HEIGHT = 64;
   useEffect(() => {
     const fetchPosts = async () => {
       setLoading(true);
       setError(null);
       try {
         const response = await axios.get(`${serverUrl}/api/posts`, {
-          params: { page: currentPage, limit },
+          params: {
+            page: currentPage,
+            limit,
+            search: searchTerm,
+          },
         });
 
+        // The API response handling is now more robust to prevent errors.
         if (Array.isArray(response.data)) {
+          // Handles cases where the API returns a simple array of posts
           setPosts(response.data);
           setTotalPages(1);
+          setCurrentPage(1);
         } else if (response.data?.posts) {
+          // Handles the expected paginated response object
           setPosts(response.data.posts);
           setTotalPages(response.data.totalPages);
+          setCurrentPage(response.data.currentPage);
         } else {
+          // Fallback for unexpected API response format, now less likely to be hit
           setPosts([]);
           setTotalPages(1);
           throw new Error("Unexpected API response format");
@@ -43,11 +57,22 @@ const AllPosts = () => {
       }
     };
     fetchPosts();
-  }, [currentPage, limit]);
+  }, [currentPage, limit, searchTerm]);
 
+  // Handler for pagination button clicks
   const handlePageChange = (page) => {
-    setCurrentPage(page);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    // Only change page if it's within valid range
+    if (page > 0 && page <= totalPages) {
+      setCurrentPage(page);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
+  // Handler for the search button click
+  const handleSearch = () => {
+    // When a search is performed, reset to the first page.
+    setCurrentPage(1);
+    setSearchTerm(pendingSearchTerm);
   };
 
   if (loading) {
@@ -81,9 +106,31 @@ const AllPosts = () => {
           All Posts
         </h1>
 
+        {/* Search Input and Button */}
+        <div className="flex items-center justify-end mb-6">
+          <div className="relative flex w-full max-w-sm rounded-lg shadow-md overflow-hidden">
+            <input
+              type="text"
+              placeholder="Search posts..."
+              value={pendingSearchTerm}
+              onChange={(e) => setPendingSearchTerm(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') handleSearch();
+              }}
+              className="w-full py-2 px-4 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200"
+            />
+            <button
+              onClick={handleSearch}
+              className="flex-shrink-0 px-4 bg-blue-600 text-white hover:bg-blue-700 transition-colors duration-200"
+            >
+              <Search className="h-5 w-5" />
+            </button>
+          </div>
+        </div>
+
         {posts.length === 0 ? (
           <p className="text-gray-500 dark:text-gray-400 text-center text-lg">
-            No posts have been created yet.
+            No posts found.
           </p>
         ) : (
           <>
@@ -115,11 +162,13 @@ const AllPosts = () => {
                       <div className="mt-4 flex items-center text-sm text-gray-500 dark:text-gray-400">
                         <span className="flex items-center mr-4">
                           <Heart className="h-4 w-4 mr-1 text-red-500" />
-                          {post.likes?.length || 0}
+                          {/* Updated to use the new likesCount property from the backend */}
+                          {post.likesCount || 0}
                         </span>
                         <span className="flex items-center">
                           <MessageSquare className="h-4 w-4 mr-1" />
-                          {post.comments?.length || 0}
+                          {/* Updated to use the new commentsCount property from the backend */}
+                          {post.commentsCount || 0}
                         </span>
                       </div>
                     </div>
@@ -174,8 +223,8 @@ const AllPosts = () => {
                     key={index}
                     onClick={() => handlePageChange(index + 1)}
                     className={`px-4 py-2 text-sm font-semibold rounded-lg transition-colors duration-200 ${currentPage === index + 1
-                        ? "bg-blue-600 text-white"
-                        : "bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600"
+                      ? "bg-blue-600 text-white"
+                      : "bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600"
                       }`}
                   >
                     {index + 1}

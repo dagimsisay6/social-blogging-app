@@ -4,8 +4,8 @@ import { useNavigate } from "react-router-dom";
 const SignUpPage = () => {
   const navigate = useNavigate();
 
-  // The base URL for your backend API
-  const API_URL = "https://social-blogging-app-1-5k7h.onrender.com/api/auth";
+
+  const API_URL = "http://localhost:5001/api/auth";
 
   // State to manage form data
   const [formData, setFormData] = useState({
@@ -72,7 +72,6 @@ const SignUpPage = () => {
           headers: {
             "Content-Type": "application/json",
           },
-          // Only send the data that the backend API expects
           body: JSON.stringify({
             firstName: formData.firstName,
             lastName: formData.lastName,
@@ -80,19 +79,14 @@ const SignUpPage = () => {
             password: formData.password,
           }),
         });
-
         const data = await response.json();
-
         if (response.ok) {
-          // Handle successful signup
           setMessage("Signup successful! Redirecting to login...");
           console.log("Signup successful:", data);
-          // Redirect to the login page after a delay
           setTimeout(() => {
             navigate("/login");
           }, 2000);
         } else {
-          // Handle server-side validation or other errors
           console.error("Signup failed:", data.msg);
           setMessage(`Error: ${data.msg || "An error occurred."}`);
         }
@@ -344,7 +338,6 @@ const SignUpPage = () => {
             <p className="text-red-500 text-sm mt-1">{errors.agreedToTerms}</p>
           )}
 
-          {/* Submit Button */}
           <button
             type="submit"
             className="w-full py-3 bg-blue-700 text-white font-semibold rounded-xl shadow-md hover:bg-blue-800 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
@@ -353,7 +346,6 @@ const SignUpPage = () => {
             {loading ? "Signing Up..." : "Sign Up"}
           </button>
 
-          {/* Display general message */}
           {message && (
             <p className="mt-4 text-center text-sm font-medium">{message}</p>
           )}
