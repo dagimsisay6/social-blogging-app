@@ -14,9 +14,6 @@ const MyPosts = () => {
 
   const serverUrl = "https://social-blogging-app-1-5k7h.onrender.com";
 
-  const NAVBAR_HEIGHT = 70;
-  const SIDEBAR_WIDTH = 100;
-
   const fetchMyPosts = async () => {
     try {
       const res = await axios.get(`${serverUrl}/api/posts/my-posts`, {
@@ -74,9 +71,9 @@ const MyPosts = () => {
         prev.map((p) =>
           p._id === id
             ? {
-              ...p,
-              likes: new Array(likesCount).fill("dummy"),
-            }
+                ...p,
+                likes: new Array(likesCount).fill("dummy"),
+              }
             : p
         )
       );
@@ -86,102 +83,101 @@ const MyPosts = () => {
   };
 
   return (
-    <div
-      style={{
-        marginTop: NAVBAR_HEIGHT,
-        marginRight: SIDEBAR_WIDTH,
-        minHeight: `calc(100vh - ${NAVBAR_HEIGHT}px)`,
-      }}
-      className="dark:bg-gray-900 text-gray-900 dark:text-white p-4 max-w-6xl mx-auto"
-    >
-      <h1 className="text-3xl font-bold mb-8 text-gray-900 dark:text-white">
-        My Posts
-      </h1>
+    <div className="dark:bg-gray-900 text-gray-900 dark:text-white min-h-screen flex flex-col px-4 sm:px-6 py-6 mt-9">
+      <div className="w-full max-w-screen-lg mx-auto flex-1 flex flex-col">
+        {/* Left-aligned heading */}
+        <h1 className="text-3xl font-bold mb-8 text-gray-900 dark:text-white">
+          My Posts
+        </h1>
 
-      {posts.length === 0 ? (
-        <p className="text-gray-600 dark:text-gray-400 text-center text-lg">
-          You have not created any posts yet.
-        </p>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {posts.map((post) => (
-            <div
-              key={post._id}
-              className="bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden group"
-            >
-              {post.images?.length > 0 && (
-                <div
-                  className="relative overflow-hidden cursor-pointer"
-                  onClick={() => navigate(`/posts/${post._id}`)}
-                >
-                  <img
-                    src={`${serverUrl}${post.images[0]}`}
-                    alt={post.title}
-                    className="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105"
-                  />
-                  <div className="absolute inset-0 bg-black bg-opacity-10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                </div>
-              )}
+        {posts.length === 0 ? (
+          <p className="text-gray-600 dark:text-gray-400 text-center text-lg">
+            You have not created any posts yet.
+          </p>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 justify-center mx-auto w-full">
+            {posts.map((post) => (
+              <div
+                key={post._id}
+                className="bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden group flex flex-col w-full max-w-sm mx-auto"
+              >
+                {post.images?.length > 0 && (
+                  <div
+                    className="relative overflow-hidden cursor-pointer"
+                    onClick={() => navigate(`/posts/${post._id}`)}
+                  >
+                    <img
+                      src={`${serverUrl}${post.images[0]}`}
+                      alt={post.title}
+                      className="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-black bg-opacity-10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                  </div>
+                )}
 
-              <div className="p-6 flex flex-col justify-between h-auto">
-                <div
-                  className="cursor-pointer"
-                  onClick={() => navigate(`/posts/${post._id}`)}
-                >
-                  <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2 truncate">
-                    {post.title}
-                  </h2>
-                  <p className="text-gray-700 dark:text-gray-300 text-sm line-clamp-3">
-                    {post.content}
-                  </p>
-                </div>
+                <div className="p-4 sm:p-6 flex flex-col justify-between flex-grow">
+                  <div
+                    className="cursor-pointer mb-4"
+                    onClick={() => navigate(`/posts/${post._id}`)}
+                  >
+                    <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white mb-2 truncate">
+                      {post.title}
+                    </h2>
+                    <p className="text-gray-700 dark:text-gray-300 text-sm line-clamp-3">
+                      {post.content}
+                    </p>
+                  </div>
 
-                <div className="flex justify-between items-center mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                  <span className="text-sm text-gray-500 dark:text-gray-400">
-                    {new Date(post.createdAt).toLocaleDateString()}
-                  </span>
-                  <div className="flex items-center space-x-4">
-                    <button
-                      onClick={(e) => handleLike(post._id, e)}
-                      className="p-2 text-blue-500 hover:text-blue-700 transition rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
-                    >
-                      <ThumbsUp size={20} />
-                      <span className="ml-1">{post.likes?.length || 0}</span>
-                    </button>
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mt-2 pt-2 border-t border-gray-200 dark:border-gray-700 space-y-3 sm:space-y-0">
+                    <span className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+                      {new Date(post.createdAt).toLocaleDateString()}
+                    </span>
 
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        navigate(`/edit-post/${post._id}`);
-                      }}
-                      className="p-2 text-yellow-500 hover:text-yellow-700 transition rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
-                    >
-                      <Pencil size={20} />
-                    </button>
+                    <div className="flex items-center justify-end space-x-3">
+                      <button
+                        onClick={(e) => handleLike(post._id, e)}
+                        className="flex items-center p-2 text-blue-500 hover:text-blue-700 transition rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
+                      >
+                        <ThumbsUp size={18} />
+                        <span className="ml-1 text-sm">
+                          {post.likes?.length || 0}
+                        </span>
+                      </button>
 
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        openDeleteModal(post._id);
-                      }}
-                      className="p-2 text-red-500 hover:text-red-700 transition rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
-                    >
-                      <Trash2 size={20} />
-                    </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/edit-post/${post._id}`);
+                        }}
+                        className="p-2 text-yellow-500 hover:text-yellow-700 transition rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
+                      >
+                        <Pencil size={18} />
+                      </button>
+
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openDeleteModal(post._id);
+                        }}
+                        className="p-2 text-red-500 hover:text-red-700 transition rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
+                      >
+                        <Trash2 size={18} />
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
-      )}
+            ))}
+          </div>
+        )}
 
-      <ConfirmationModal
-        isOpen={isModalOpen}
-        onClose={handleCancelDelete}
-        onConfirm={handleConfirmDelete}
-        message="Are you sure you want to delete this post? This action cannot be undone."
-      />
+        <ConfirmationModal
+          isOpen={isModalOpen}
+          onClose={handleCancelDelete}
+          onConfirm={handleConfirmDelete}
+          message="Are you sure you want to delete this post? This action cannot be undone."
+        />
+      </div>
     </div>
   );
 };

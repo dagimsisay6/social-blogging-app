@@ -1,28 +1,19 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 
 const LoginPage = () => {
   const navigate = useNavigate();
-  // Destructure the login function from useAuth
   const { login } = useAuth();
 
-  // State to manage form data, updated to use 'email' to match the backend
   const [formData, setFormData] = useState({
     email: "",
     password: "",
     rememberMe: false,
   });
-
-  // State to manage UI feedback
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
-
-  // State to manage password visibility
   const [showPassword, setShowPassword] = useState(false);
-
-  // State for form validation errors
   const [errors, setErrors] = useState({});
 
   const handleChange = (e) => {
@@ -49,17 +40,10 @@ const LoginPage = () => {
     if (validateForm()) {
       try {
         const result = await login(formData.email, formData.password);
-
         if (result.success) {
-          // Check the success property from the result
           setMessage("Login successful! Redirecting to dashboard...");
-          console.log("Login successful:", result.message);
-
-          setTimeout(() => {
-            navigate("/dashboard");
-          }, 2000);
+          setTimeout(() => navigate("/dashboard"), 2000);
         } else {
-          console.error("Login failed:", result.message);
           setMessage(`Error: ${result.message}`);
         }
       } catch (error) {
@@ -70,14 +54,13 @@ const LoginPage = () => {
     setLoading(false);
   };
 
-  // rest of the component remains the same
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 p-6">
-      <div className="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-lg">
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900 transition-colors duration-300 p-6 w-full my-6 mt-6">
+      <div className="bg-white dark:bg-gray-800 dark:text-white p-8 rounded-2xl shadow-2xl w-full max-w-lg">
         {/* Back Button */}
         <button
           onClick={() => navigate("/")}
-          className="flex items-center text-gray-500 hover:text-gray-700 transition-colors duration-200"
+          className="flex items-center text-gray-500 dark:text-gray-300 hover:text-gray-700 dark:hover:text-white transition-colors duration-200"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -98,15 +81,19 @@ const LoginPage = () => {
 
         {/* Header */}
         <div className="text-center mt-6 mb-8">
-          <h1 className="text-4xl font-bold text-gray-800">Welcome back!</h1>
-          <p className="text-lg text-gray-600 mt-2">Log in to your account</p>
+          <h1 className="text-4xl font-bold text-gray-800 dark:text-white">
+            Welcome back!
+          </h1>
+          <p className="text-lg text-gray-600 dark:text-gray-300 mt-2">
+            Log in to your account
+          </p>
         </div>
 
         {/* Login Form */}
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Email Field */}
           <div>
-            <label className="block text-gray-700 font-semibold mb-2">
+            <label className="block text-gray-700 dark:text-gray-300 font-semibold mb-2">
               Email
             </label>
             <input
@@ -116,8 +103,10 @@ const LoginPage = () => {
               onChange={handleChange}
               placeholder="johndoe@example.com"
               className={`w-full p-3 rounded-lg border-2 ${
-                errors.email ? "border-red-500" : "border-gray-300"
-              } focus:outline-none focus:border-blue-500 transition-colors`}
+                errors.email
+                  ? "border-red-500"
+                  : "border-gray-300 dark:border-gray-600"
+              } focus:outline-none focus:border-blue-500 dark:bg-gray-700 transition-colors`}
             />
             {errors.email && (
               <p className="text-red-500 text-sm mt-1">{errors.email}</p>
@@ -126,7 +115,7 @@ const LoginPage = () => {
 
           {/* Password Field */}
           <div>
-            <label className="block text-gray-700 font-semibold mb-2">
+            <label className="block text-gray-700 dark:text-gray-300 font-semibold mb-2">
               Password
             </label>
             <div className="relative">
@@ -137,8 +126,10 @@ const LoginPage = () => {
                 onChange={handleChange}
                 placeholder="Password"
                 className={`w-full p-3 rounded-lg border-2 ${
-                  errors.password ? "border-red-500" : "border-gray-300"
-                } focus:outline-none focus:border-blue-500 transition-colors`}
+                  errors.password
+                    ? "border-red-500"
+                    : "border-gray-300 dark:border-gray-600"
+                } focus:outline-none focus:border-blue-500 dark:bg-gray-700 transition-colors`}
               />
               <button
                 type="button"
@@ -189,19 +180,19 @@ const LoginPage = () => {
                 name="rememberMe"
                 checked={formData.rememberMe}
                 onChange={handleChange}
-                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
               />
-              <label className="ml-2 block text-sm text-gray-900">
+              <label className="ml-2 block text-sm text-gray-900 dark:text-gray-300">
                 Remember Me
               </label>
             </div>
-            <a
-              href="#"
+            <button
+              type="button"
               onClick={() => navigate("/reset-password")}
               className="text-sm text-blue-600 hover:text-blue-800 transition-colors"
             >
               Forgotten password?
-            </a>
+            </button>
           </div>
 
           {/* Log In Button */}
@@ -221,13 +212,15 @@ const LoginPage = () => {
 
         {/* Separator */}
         <div className="flex items-center my-6">
-          <div className="flex-grow border-t border-gray-300"></div>
-          <span className="mx-4 text-sm text-gray-500">or</span>
-          <div className="flex-grow border-t border-gray-300"></div>
+          <div className="flex-grow border-t border-gray-300 dark:border-gray-600"></div>
+          <span className="mx-4 text-sm text-gray-500 dark:text-gray-400">
+            or
+          </span>
+          <div className="flex-grow border-t border-gray-300 dark:border-gray-600"></div>
         </div>
 
         <div className="text-center mt-6">
-          <p className="text-gray-700">
+          <p className="text-gray-700 dark:text-gray-300">
             Don't have an account?{" "}
             <button
               onClick={() => navigate("/signup")}
