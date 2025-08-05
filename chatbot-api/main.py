@@ -96,7 +96,6 @@ class APIResponse(BaseModel):
     message: str
 
 # --- SESSION MANAGEMENT ---
-# Simple in-memory session storage (in production, use Redis or database)
 chat_sessions: Dict[str, List[Dict[str, str]]] = {}
 
 def get_or_create_session(session_id: str = "default") -> List[Dict[str, str]]:
