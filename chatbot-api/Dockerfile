@@ -14,14 +14,15 @@ RUN apt-get update && apt-get install -y \
     g++ \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements
-COPY pyproject.toml uv.lock ./
+# Copy requirements (make uv.lock optional)
+COPY pyproject.toml ./
+COPY uv.loc[k] ./
 
 # Install UV package manager for faster dependency installation
 RUN pip install uv
 
-# Install dependencies
-RUN uv sync --frozen
+# Install dependencies (without --frozen since no lock file)
+RUN uv sync
 
 # Copy application code
 COPY . .
