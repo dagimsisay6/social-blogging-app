@@ -3,11 +3,8 @@ import { useNavigate } from "react-router-dom";
 
 const SignUpPage = () => {
   const navigate = useNavigate();
-
-  // The base URL for your backend API
   const API_URL = "https://social-blogging-app-1-5k7h.onrender.com/api/auth";
 
-  // State to manage form data
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -16,22 +13,16 @@ const SignUpPage = () => {
     confirmPassword: "",
     agreedToTerms: false,
   });
-
-  // State to manage UI feedback
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
-
-  // State to manage password visibility
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
-  // State for form validation errors
   const [errors, setErrors] = useState({});
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData((prevData) => ({
-      ...prevData,
+    setFormData((prev) => ({
+      ...prev,
       [name]: type === "checkbox" ? checked : value,
     }));
   };
@@ -69,10 +60,7 @@ const SignUpPage = () => {
       try {
         const response = await fetch(`${API_URL}/signup`, {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          // Only send the data that the backend API expects
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             firstName: formData.firstName,
             lastName: formData.lastName,
@@ -84,16 +72,9 @@ const SignUpPage = () => {
         const data = await response.json();
 
         if (response.ok) {
-          // Handle successful signup
           setMessage("Signup successful! Redirecting to login...");
-          console.log("Signup successful:", data);
-          // Redirect to the login page after a delay
-          setTimeout(() => {
-            navigate("/login");
-          }, 2000);
+          setTimeout(() => navigate("/login"), 2000);
         } else {
-          // Handle server-side validation or other errors
-          console.error("Signup failed:", data.msg);
           setMessage(`Error: ${data.msg || "An error occurred."}`);
         }
       } catch (error) {
@@ -105,12 +86,12 @@ const SignUpPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 p-6">
-      <div className="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-lg">
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900 transition-colors duration-300 p-6 w-full mt-6">
+      <div className="bg-white dark:bg-gray-800 dark:text-white p-8 rounded-2xl shadow-2xl w-full max-w-lg">
         {/* Back Button */}
         <button
           onClick={() => navigate("/")}
-          className="flex items-center text-gray-500 hover:text-gray-700 transition-colors duration-200"
+          className="flex items-center text-gray-500 dark:text-gray-300 hover:text-gray-700 dark:hover:text-white transition-colors duration-200"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -131,8 +112,10 @@ const SignUpPage = () => {
 
         {/* Header */}
         <div className="text-center mt-6 mb-8">
-          <h1 className="text-4xl font-bold text-gray-800">Welcome!</h1>
-          <p className="text-lg text-gray-600 mt-2">
+          <h1 className="text-4xl font-bold text-gray-800 dark:text-white">
+            Welcome!
+          </h1>
+          <p className="text-lg text-gray-600 dark:text-gray-300 mt-2">
             Sign up to join our community!
           </p>
         </div>
@@ -141,7 +124,7 @@ const SignUpPage = () => {
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* First Name */}
           <div>
-            <label className="block text-gray-700 font-semibold mb-2">
+            <label className="block text-gray-700 dark:text-gray-300 font-semibold mb-2">
               First Name
             </label>
             <input
@@ -150,8 +133,11 @@ const SignUpPage = () => {
               value={formData.firstName}
               onChange={handleChange}
               placeholder="John"
-              className={`w-full p-3 rounded-lg border-2 ${errors.firstName ? "border-red-500" : "border-gray-300"
-                } focus:outline-none focus:border-blue-500 transition-colors`}
+              className={`w-full p-3 rounded-lg border-2 ${
+                errors.firstName
+                  ? "border-red-500"
+                  : "border-gray-300 dark:border-gray-600"
+              } focus:outline-none focus:border-blue-500 dark:bg-gray-700 transition-colors`}
             />
             {errors.firstName && (
               <p className="text-red-500 text-sm mt-1">{errors.firstName}</p>
@@ -160,7 +146,7 @@ const SignUpPage = () => {
 
           {/* Last Name */}
           <div>
-            <label className="block text-gray-700 font-semibold mb-2">
+            <label className="block text-gray-700 dark:text-gray-300 font-semibold mb-2">
               Last Name
             </label>
             <input
@@ -169,17 +155,20 @@ const SignUpPage = () => {
               value={formData.lastName}
               onChange={handleChange}
               placeholder="Doe"
-              className={`w-full p-3 rounded-lg border-2 ${errors.lastName ? "border-red-500" : "border-gray-300"
-                } focus:outline-none focus:border-blue-500 transition-colors`}
+              className={`w-full p-3 rounded-lg border-2 ${
+                errors.lastName
+                  ? "border-red-500"
+                  : "border-gray-300 dark:border-gray-600"
+              } focus:outline-none focus:border-blue-500 dark:bg-gray-700 transition-colors`}
             />
             {errors.lastName && (
               <p className="text-red-500 text-sm mt-1">{errors.lastName}</p>
             )}
           </div>
 
-          {/* Email Address */}
+          {/* Email */}
           <div>
-            <label className="block text-gray-700 font-semibold mb-2">
+            <label className="block text-gray-700 dark:text-gray-300 font-semibold mb-2">
               Email Address
             </label>
             <input
@@ -188,17 +177,20 @@ const SignUpPage = () => {
               value={formData.email}
               onChange={handleChange}
               placeholder="johndoe@gmail.com"
-              className={`w-full p-3 rounded-lg border-2 ${errors.email ? "border-red-500" : "border-gray-300"
-                } focus:outline-none focus:border-blue-500 transition-colors`}
+              className={`w-full p-3 rounded-lg border-2 ${
+                errors.email
+                  ? "border-red-500"
+                  : "border-gray-300 dark:border-gray-600"
+              } focus:outline-none focus:border-blue-500 dark:bg-gray-700 transition-colors`}
             />
             {errors.email && (
               <p className="text-red-500 text-sm mt-1">{errors.email}</p>
             )}
           </div>
 
-          {/* Create Password */}
+          {/* Password */}
           <div>
-            <label className="block text-gray-700 font-semibold mb-2">
+            <label className="block text-gray-700 dark:text-gray-300 font-semibold mb-2">
               Create Password
             </label>
             <div className="relative">
@@ -208,8 +200,11 @@ const SignUpPage = () => {
                 value={formData.password}
                 onChange={handleChange}
                 placeholder="Password"
-                className={`w-full p-3 rounded-lg border-2 ${errors.password ? "border-red-500" : "border-gray-300"
-                  } focus:outline-none focus:border-blue-500 transition-colors`}
+                className={`w-full p-3 rounded-lg border-2 ${
+                  errors.password
+                    ? "border-red-500"
+                    : "border-gray-300 dark:border-gray-600"
+                } focus:outline-none focus:border-blue-500 dark:bg-gray-700 transition-colors`}
               />
               <button
                 type="button"
@@ -250,12 +245,14 @@ const SignUpPage = () => {
             {errors.password && (
               <p className="text-red-500 text-sm mt-1">{errors.password}</p>
             )}
-            <p className="text-sm text-gray-500 mt-1">Should be 6 characters</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+              Should be 6 characters
+            </p>
           </div>
 
           {/* Confirm Password */}
           <div>
-            <label className="block text-gray-700 font-semibold mb-2">
+            <label className="block text-gray-700 dark:text-gray-300 font-semibold mb-2">
               Confirm Password
             </label>
             <div className="relative">
@@ -265,8 +262,11 @@ const SignUpPage = () => {
                 value={formData.confirmPassword}
                 onChange={handleChange}
                 placeholder="Password"
-                className={`w-full p-3 rounded-lg border-2 ${errors.confirmPassword ? "border-red-500" : "border-gray-300"
-                  } focus:outline-none focus:border-blue-500 transition-colors`}
+                className={`w-full p-3 rounded-lg border-2 ${
+                  errors.confirmPassword
+                    ? "border-red-500"
+                    : "border-gray-300 dark:border-gray-600"
+                } focus:outline-none focus:border-blue-500 dark:bg-gray-700 transition-colors`}
               />
               <button
                 type="button"
@@ -309,22 +309,22 @@ const SignUpPage = () => {
                 {errors.confirmPassword}
               </p>
             )}
-            <p className="text-sm text-gray-500 mt-1">
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
               Should be similar password
             </p>
           </div>
 
-          {/* Terms and Conditions Checkbox */}
+          {/* Terms */}
           <div className="flex items-center">
             <input
               type="checkbox"
               name="agreedToTerms"
               checked={formData.agreedToTerms}
               onChange={handleChange}
-              className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
             />
-            <label className="ml-2 block text-sm text-gray-900">
-              By clicking on 'Sign up', you're agreeing to the Chunky app{" "}
+            <label className="ml-2 block text-sm text-gray-900 dark:text-gray-300">
+              By clicking 'Sign up', you agree to our{" "}
               <a
                 href="#"
                 className="text-blue-600 hover:text-blue-800 transition-colors"
@@ -338,13 +338,14 @@ const SignUpPage = () => {
               >
                 Privacy Policy
               </a>
+              .
             </label>
           </div>
           {errors.agreedToTerms && (
             <p className="text-red-500 text-sm mt-1">{errors.agreedToTerms}</p>
           )}
 
-          {/* Submit Button */}
+          {/* Submit */}
           <button
             type="submit"
             className="w-full py-3 bg-blue-700 text-white font-semibold rounded-xl shadow-md hover:bg-blue-800 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
@@ -353,7 +354,7 @@ const SignUpPage = () => {
             {loading ? "Signing Up..." : "Sign Up"}
           </button>
 
-          {/* Display general message */}
+          {/* General Message */}
           {message && (
             <p className="mt-4 text-center text-sm font-medium">{message}</p>
           )}

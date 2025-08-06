@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext.jsx";
 import { useSidebar } from "../context/SideBarContext.jsx";
 import ProfilePictureUploader from "../pages/ProfilePictureUploader.jsx";
 import { Menu, Sun, Moon, UserRound, ChevronDown } from "lucide-react";
+import blogBridgeLogo from "./../assets/icon.jpg";
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -19,9 +20,14 @@ const Navbar = () => {
 
   const serverUrl = "https://social-blogging-app-1-5k7h.onrender.com";
 
+  // Apply dark mode to the whole page
   useEffect(() => {
     document.documentElement.classList.toggle("dark", isDarkMode);
     localStorage.setItem("theme", isDarkMode ? "dark" : "light");
+
+    // Change the body background for full-screen dark effect
+    document.body.classList.toggle("bg-gray-900", isDarkMode);
+    document.body.classList.toggle("bg-white", !isDarkMode);
   }, [isDarkMode]);
 
   const handleThemeToggle = () => {
@@ -44,11 +50,11 @@ const Navbar = () => {
         className="
           bg-white dark:bg-gray-800 shadow-md p-4 flex justify-between items-center
           fixed top-0 z-10 transition-all duration-300
-          w-full lg:w-[calc(100%-5rem)]  
-          lg:left-[5rem]                 
+          w-full lg:w-[calc(100%-5rem)]
+          lg:left-[5rem]
         "
       >
-        <div className="flex items-center">
+        <div className="flex items-center space-x-2">
           <button
             onClick={toggleSidebar}
             className="lg:hidden text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-md p-1 mr-3"
@@ -59,13 +65,21 @@ const Navbar = () => {
 
           <Link
             to={isAuthenticated ? "/dashboard" : "/"}
-            className="text-2xl font-bold text-blue-600 dark:text-blue-400"
+            className="flex items-center space-x-2"
           >
-            MySocial
+            <img
+              src={blogBridgeLogo}
+              alt="Blog Bridge Logo"
+              className="h-8 w-auto rounded-full"
+            />
+            <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+              Blog Bridge
+            </span>
           </Link>
         </div>
 
         <div className="flex items-center space-x-4">
+          {/* Dark mode toggle button */}
           <button
             onClick={handleThemeToggle}
             className="p-2 rounded-full text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
